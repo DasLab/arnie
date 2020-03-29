@@ -5,24 +5,28 @@ import numpy as np
 from .utils import *
 from .pfunc import pfunc
 
-DEBUG=False
+DEBUG=True
 
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
 
-def bpps(sequence, package='vienna', constraint=None, T=37, coaxial=True,  motif=None, dangles=True,param_file=None,reweight=None):
+def bpps(sequence, package='vienna', constraint=None,
+         T=37, coaxial=True, linear=False,
+        motif=None, dangles=True,param_file=None,reweight=None):
     ''' Compute base pairing probability matrix for RNA sequence.
 
     Args:
     sequence (str): nucleic acid sequence
     T (float): temperature (Celsius)
+    linear (bool): call LinearPartition to estimate Z in Vienna or Contrafold
     constraint (str): structure constraint (functional in vienna, contrafold, rnastructure)
     motif (str): argument to vienna motif
     dangles (bool): dangles or not, specifiable for vienna, nupack
     coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
     noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
 
-    Possible packages: 'vienna_2', 'vienna_1','contrafold_1','contrafold_2','nupack_95','nupack_99','rnasoft_2007','rnasoft_1999','rnastructure','vfold_0','vfold_1'
+    Possible packages: 'vienna_2', 'vienna_1','contrafold_1','contrafold_2',
+    'nupack_95','nupack_99','rnasoft_2007','rnasoft_1999','rnastructure','vfold_0','vfold_1'
  
     Returns
     array: NxN matrix of base pair probabilities
@@ -39,24 +43,35 @@ def bpps(sequence, package='vienna', constraint=None, T=37, coaxial=True,  motif
         print('Warning: %s does not support dangles options' % pkg)
     if not coaxial and pkg not in ['rnastructure','vfold']:
         print('Warning: %s does not support coaxial options' % pkg)
+    if linear and pkg not in ['vienna','contrafold']:
+        print('Warning: LinearPartition only implemented for vienna and contrafold.')
 
     if pkg=='nupack':
         return bpps_nupack_(sequence, version = version, dangles = dangles, T = T)
     elif pkg=='vfold':
         return bpps_vfold_(sequence, version = version, T = T, coaxial = coaxial)
     else:
-        _, tmp_file = pfunc(sequence, package=package, bpps=True, motif=motif, constraint=constraint, T=T, coaxial=coaxial, dangles=dangles, param_file=param_file,reweight=reweight)
-        if 'contrafold' in package:
-            return bpps_contrafold_(sequence, tmp_file)
-        elif 'vienna' in package:
-            return bpps_vienna_(sequence, tmp_file)
-        elif 'rnasoft' in package:
-            return bpps_rnasoft_(sequence, tmp_file)
-        elif 'rnastructure' in package:
-            return bpps_rnastructure_(sequence, tmp_file, coaxial=coaxial)
 
+        _, tmp_file = pfunc(sequence, package=package, bpps=True, linear=linear,
+            motif=motif, constraint=constraint, T=T, coaxial=coaxial,
+             dangles=dangles, param_file=param_file,reweight=reweight)
+
+        if linear:
+            #parse linearpartition output
+            return bpps_linearpartition_(sequence, tmp_file)
         else:
-            raise RuntimeError('package not yet implemented')
+
+            if 'contrafold' in package:
+                return bpps_contrafold_(sequence, tmp_file)
+            elif 'vienna' in package:
+                return bpps_vienna_(sequence, tmp_file)
+            elif 'rnasoft' in package:
+                return bpps_rnasoft_(sequence, tmp_file)
+            elif 'rnastructure' in package:
+                return bpps_rnastructure_(sequence, tmp_file, coaxial=coaxial)
+
+            else:
+                raise RuntimeError('package not yet implemented')
 
 def bpps_vienna_(sequence, tmp_file):
 
@@ -237,6 +252,27 @@ def bpps_vfold_(sequence, version='0',T=37, coaxial=True):
 
     return probs
     #output: take second field of last line for Z 
+
+
+def bpps_linearpartition_(sequence, tmp_file):
+
+    fname = tmp_file
+
+    probs=np.zeros([len(sequence), len(sequence)])
+
+    for line in open(fname).readlines():
+        print(line)
+        first_ind, second_ind, p = line.split(' ')
+        first_ind = int(first_ind)-1
+        second_ind = int(second_ind)-1
+        p = float(p)
+        probs[first_ind, second_ind] = p
+        probs[second_ind, first_ind] = p
+
+
+    os.remove(fname)
+
+    return probs
 
 
 
