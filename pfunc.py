@@ -10,7 +10,7 @@ DEBUG=False
 package_locs = load_package_locations()
 
 def pfunc(seq, package='vienna_2', T=37,
-    constraint=None, motif=None,
+    constraint=None, motif=None, linear=False,
     dangles=True, noncanonical=False,
     bpps=False, param_file=None, coaxial=True, reweight=None,return_free_energy = False):
     ''' Compute partition function for RNA sequence.
@@ -20,6 +20,7 @@ def pfunc(seq, package='vienna_2', T=37,
         T (float): temperature (Celsius)
         constraint (str): structure constraints
         motif (str): argument to vienna motif 
+        linear (bool): call LinearPartition to estimate Z in Vienna or Contrafold
         dangles (bool): dangles or not, specifiable for vienna, nupack
         coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
         noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
@@ -41,13 +42,22 @@ def pfunc(seq, package='vienna_2', T=37,
             print('Warning: %s does not support dangles options' % pkg)
         if not coaxial and pkg not in ['rnastructure', 'vfold']:
             print('Warning: %s does not support coaxial options' % pkg)
+        if linear and pkg not in ['vienna','contrafold']:
+            print('Warning: LinearPartition only implemented for vienna and contrafold.')
 
     if pkg=='vienna':
-        Z, tmp_file = pfunc_vienna_(seq, version=version, T=T, dangles=dangles, constraint=constraint, 
-            motif=motif, bpps=bpps, param_file=param_file,reweight=reweight, return_free_energy=return_free_energy)
- 
+        if linear:
+            Z, tmp_file = pfunc_linearpartition_(seq, package='vienna',bpps=bpps)
+
+        else:
+            Z, tmp_file = pfunc_vienna_(seq, version=version, T=T, dangles=dangles, constraint=constraint,
+                motif=motif, bpps=bpps, param_file=param_file,reweight=reweight, return_free_energy=return_free_energy)
+     
     elif pkg=='contrafold':
-        Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, constraint=constraint, bpps=bpps, param_file=param_file)
+        if linear:
+            Z, tmp_file = pfunc_linearpartition_(seq, package='contrafold', bpps=bpps)
+        else:
+            Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, constraint=constraint, bpps=bpps, param_file=param_file)
 
     elif pkg=='rnastructure':
         Z, tmp_file = pfunc_rnastructure_(seq, version=version, T=T, coaxial=coaxial, constraint=constraint, bpps=bpps)
@@ -197,7 +207,6 @@ def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False, param
 
     if param_file is not None:
         command = command + ['--params', param_file]
-
 
     if constraint is not None:
         convert_dbn_to_contrafold_input(seq, constraint, fname)
@@ -419,5 +428,49 @@ def pfunc_vfold_(seq, version='0', T=37, coaxial=True, bpps=False):
     #output: take second field of last line for Z 
 
 
+def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100):
 
+    LOC = package_locs['linearpartition']
+    tmp_file = filename()
+
+    if bpps:
+        pf_only = 0
+    else:
+        pf_only = 1
+
+    # args: beamsize, is_sharpturn, is_verbose, bpp_file, bpp_prefix, pf_only, bpp_cutoff
+    command=['echo %s | %s/linearpartition_%s' % (seq, LOC, package[0]), str(beam_size),
+     '0', '0', tmp_file, '', str(pf_only), '0.000001']
+    if DEBUG: print(' '.join(command))
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
+
+    stdout, stderr = p.communicate(input=str.encode(seq))
+
+    if DEBUG:
+        print('stdout')
+        print(stdout)
+        print('stderr')
+        print(stderr)
+
+    if p.returncode:
+        raise Exception('LinearPartition failed: on %s\n%s' % (seq, stderr))
+
+    # Note: the linearfold exec says this is free energy in kcal/mol.
+    # Todo: look in to if this is actually free energy or still just cfold log Z
+
+    # linearfold returns two different things depending on which package
+    if package=='contrafold':
+        logZ=float(stdout.decode('utf-8').split(' ')[-1])
+    elif package=='vienna':
+        free_energy = float(stdout.decode('utf-8').split(' ')[-2])
+
+    if bpps:
+        return 0, tmp_file
+    else:
+        if package=='contrafold':
+        #os.remove(tmp_file)
+            return np.exp(logZ), None
+        elif package=='vienna':
+            T=37
+            return np.exp(-1*free_energy/(.0019899*(273+T))), None
 

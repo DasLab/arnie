@@ -11,6 +11,7 @@ package_locs = load_package_locations()
 
 def mfe(seq, package='vienna_2', T=37,
     constraint=None, motif=None,
+    linear=False,
     dangles=True, noncanonical=False,
     bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False):
     ''' Compute MFE structure (within package) for RNA sequence.
@@ -22,6 +23,7 @@ def mfe(seq, package='vienna_2', T=37,
         seq (str): nucleic acid sequence
         T (float): temperature (Celsius)
         constraint (str): structure constraints
+        linear (bool): call LinearFold to estimate MFE in Vienna or Contrafold
         motif (str): argument to vienna motif 
         dangles (bool): dangles or not, specifiable for vienna, nupack
         coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
@@ -45,11 +47,20 @@ def mfe(seq, package='vienna_2', T=37,
         if not coaxial and pkg not in ['rnastructure', 'vfold']:
             print('Warning: %s does not support coaxial options' % pkg)
 
+    if linear and pkg not in ['vienna','contrafold']:
+        print('Warning: LinearFold only implemented for vienna and contrafold.')
+
     if pkg=='vienna':
-        struct = mfe_vienna_(seq, version=version, T=T, dangles=dangles, constraint=constraint, motif=motif, param_file=param_file,reweight=reweight)
+        if linear:
+            struct = mfe_linearfold_(seq, package='vienna')
+        else:
+            struct = mfe_vienna_(seq, version=version, T=T, dangles=dangles, constraint=constraint, motif=motif, param_file=param_file,reweight=reweight)
  
     elif pkg=='contrafold':
-        struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=param_file,viterbi=viterbi)
+        if linear:
+            struct = mfe_linearfold_(seq, package='contrafold')
+        else:
+            struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=param_file,viterbi=viterbi)
 
     else:
         raise ValueError('package %s not understood.' % package)
@@ -175,3 +186,40 @@ def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,vit
     os.remove(fname)
     
     return stdout.decode('utf-8').split('\n')[-2]
+
+def mfe_linearfold_(seq, bpps=False, package='contrafold', beam_size=100):
+    
+    seqfile = write([seq])
+
+    LOC = package_locs['linearfold']
+
+    if bpps:
+
+        pf_only = 0
+    else:
+        pf_only = 1
+
+    # args:  beamsize, is_sharpturn, is_verbose, is_eval, is_constraints]
+    #Todo: implement constraint input
+    command=['echo %s | %s/linearfold_%s' % (seq, LOC, package[0]), str(beam_size), '0', '0', '0']
+    if DEBUG: print(' '.join(command))
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE, shell=True)
+
+    stdout, stderr = p.communicate()
+
+    if DEBUG:
+        print('stdout')
+        print(stdout)
+        print('stderr')
+        print(stderr)
+
+    if p.returncode:
+        raise Exception('LinearFold failed: on %s\n%s' % (seq, stderr))
+
+
+    # linearfold returns two different things depending on which package
+
+    return stdout.decode('utf-8').split('\n')[1].split(' ')[0]
+
+
+
