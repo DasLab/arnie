@@ -3,7 +3,7 @@ Python API to compute RNA energetics and do structure prediction from all availa
 
 Das Lab, 2019
 
-Hannah Wayment-Steele, with inspiration from MWu's `wuami_tools`
+Hannah Wayment-Steele
 
 ## Organization:
 
