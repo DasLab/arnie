@@ -42,7 +42,7 @@ class RNAGraph(object):
         self.n_helices = len(list(self.G.edges))
         self.MLD = nx.algorithms.dag.dag_longest_path_length(self.G)
 
-        self.n_hairpins, self.n_internal_loops, self.n_multiloops = self.count_loops()
+        self.n_hairpins, self.n_internal_loops, self.n_3WJs, self.n_4WJs, self.n_5WJs_up = self.count_loops()
 
         
     def setup_graph(self):
@@ -102,22 +102,27 @@ class RNAGraph(object):
         nx.draw_kamada_kawai(self.G, node_size = [node_scaling*100*x for x in self.loop_sizes.values()])
 
     def count_loops(self):
-        hairpins, int_loops, multiloops = 0,0,0
+        n_1, n_2, n_3, n_4, n_5 = 0,0,0,0,0
         for x in list(self.G.degree):
             if x[1]==1:
-                hairpins +=1
+                n_1 +=1
             elif x[1] == 2:
-                int_loops += 1
-            elif x[1] > 2:
-                multiloops += 1
-        return hairpins, int_loops, multiloops
+                n_2 += 1
+            elif x[1] == 3:
+                n_3 += 1
+            elif x[1] == 4:
+                n_4 += 1
+            elif x[1] > 4:
+                n_5 += 1
+        return n_1, n_2, n_3, n_4, n_5
 
     def get_info(self):
         print("Max ladder distance: %d" % self.MLD)
         print("n_helices: %d" % self.n_helices)
         print("n_hairpins: %d" % self.n_hairpins)
-        print("n_internal_loops: %d" % self.n_internal_loops)
-        print("n_multiloops: %d" % self.n_multiloops)
+        print("n_3WJs: %d" % self.n_3WJs)
+        print("n_4WJs: %d" % self.n_4WJs)
+        print("n_5WJs_up: %d" % self.n_5WJs_up)
 
 
                 
