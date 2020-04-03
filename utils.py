@@ -46,9 +46,9 @@ def get_expected_accuracy(dbn_string, bp_matrix, mode='mcc'):
 
   a,b = np.triu_indices(N)
   cFP = 1e-6 # compatible false positives
-  for i in range(len(pred_m)):
-      if np.sum(struct_matrix,axis=0)[a[i]] + np.sum(struct_matrix,axis=0)[b[i]]==0:
-         cFP += np.multiply(pred_m[i], 1-probs[i])
+  # for i in range(len(pred_m)):
+  #     if np.sum(struct_matrix,axis=0)[a[i]] + np.sum(struct_matrix,axis=0)[b[i]]==0:
+  #        cFP += np.multiply(pred_m[i], 1-probs[i])
 
   if mode=='sen':
     return TP/(TP + FN)
