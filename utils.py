@@ -18,6 +18,59 @@ def complement_to_(string):
         base_pairing_dct = {'a':'u', 'u':'a', 'g':'c', 'c':'g','t':'a'}
         return ''.join(base_pairing_dct[x.lower()] for x in string[::-1])
 
+def get_expected_accuracy(dbn_string, bp_matrix, mode='mcc'):
+  '''given a secondary structure as dbn string and base pair matrix, 
+  assess expected accuracy for the structure.
+
+  Inputs:
+  dbn_string (str): Secondary structure string in dot-parens notation.
+  bp_matrix (NxN array):  symmetric matrix of base pairing probabilities.
+  mode: ['mcc','fscore','sen','ppv']: accuracy metric for which to compute expected value.
+
+  Returns: expected accuracy value.
+  '''
+
+  assert bp_matrix.shape[0] == bp_matrix.shape[1]
+  assert bp_matrix.shape[0] == len(dbn_string)
+
+  struct_matrix = convert_dotbracket_to_matrix(dbn_string)
+  N = len(dbn_string)
+
+  pred_m = struct_matrix[np.triu_indices(N)]
+  probs = bp_matrix[np.triu_indices(N)]
+
+  TP = np.sum(np.multiply(pred_m, probs)) + 1e-6
+  TN = 0.5*N*N-1 - np.sum(pred_m) - np.sum(probs) + TP + 1e-6
+  FP = np.sum(np.multiply(pred_m, 1-probs)) + 1e-6
+  FN = np.sum(np.multiply(1-pred_m, probs)) + 1e-6
+
+  a,b = np.triu_indices(N)
+  cFP = 1e-6 # compatible false positives
+  for i in range(len(pred_m)):
+      if np.sum(struct_matrix,axis=0)[a[i]] + np.sum(struct_matrix,axis=0)[b[i]]==0:
+         cFP += np.multiply(pred_m[i], 1-probs[i])
+
+  if mode=='sen':
+    return TP/(TP + FN)
+  elif mode=='ppv':
+    return TP/(TP + FP - cFP)
+  elif mode=='mcc':
+    return (TP*TN - (FP - cFP)*FN)/np.sqrt((TP + FP - cFP)*(TP + FN)*(TN + FP - cFP)*(TN + FN))
+  elif mode=='fscore':
+    return 2*TP/(2*TP + FP - cFP + FN)
+  else:
+    print('Error: mode not understood.')
+
+
+
+def get_mean_base_pair_propensity(dbn_string):
+    '''Measure of base pair locality.'''
+    mat = convert_dotbracket_to_matrix(dbn_string)
+    i, j = np.where(mat==1)
+    #divide by 2 because symmetric matrix
+    mean_bp_dist = 0.5*np.mean([np.abs(x-y) for (x,y) in list(zip(i,j))])
+    return mean_bp_dist
+
 def convert_dotbracket_to_bp_list(s, allow_pseudoknots=False):
     m = {}
     bp1=[]
