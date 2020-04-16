@@ -50,25 +50,33 @@ def pfunc(seq, package='vienna_2', T=37,
             Z, tmp_file = pfunc_linearpartition_(seq, package='vienna',bpps=bpps)
 
         else:
-            Z, tmp_file = pfunc_vienna_(seq, version=version, T=T, dangles=dangles, constraint=constraint,
-                motif=motif, bpps=bpps, param_file=param_file,reweight=reweight, return_free_energy=return_free_energy)
+            Z, tmp_file = pfunc_vienna_(seq, version=version, T=T, dangles=dangles,
+             constraint=constraint, motif=motif, bpps=bpps, param_file=param_file,
+             reweight=reweight, return_free_energy=return_free_energy)
      
     elif pkg=='contrafold':
         if linear:
             Z, tmp_file = pfunc_linearpartition_(seq, package='contrafold', bpps=bpps)
         else:
-            Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, constraint=constraint, bpps=bpps, param_file=param_file)
+            Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, 
+                constraint=constraint, bpps=bpps, param_file=param_file,
+                return_free_energy=return_free_energy)
 
     elif pkg=='rnastructure':
-        Z, tmp_file = pfunc_rnastructure_(seq, version=version, T=T, coaxial=coaxial, constraint=constraint, bpps=bpps)
+        Z, tmp_file = pfunc_rnastructure_(seq, version=version, T=T, coaxial=coaxial, 
+            constraint=constraint, bpps=bpps, return_free_energy=return_free_energy)
 
     elif pkg=='rnasoft':
         if constraint is not None:
-            print("ERROR: RNAsoft is unable to handle constraints for calculating partition functions, returning unconstrained Z.")
-        Z, tmp_file = pfunc_rnasoft_(seq, version=version, T=T, constraint=constraint, bpps=bpps)
+            print("ERROR: RNAsoft is unable to handle constraints for calculating \
+                partition functions, returning unconstrained Z.")
+
+        Z, tmp_file = pfunc_rnasoft_(seq, version=version, T=T, constraint=constraint,
+         bpps=bpps,return_free_energy=return_free_energy)
 
     elif pkg=='nupack':
-        Z, tmp_file = pfunc_nupack_(seq, version=version, dangles=dangles, T=T)
+        Z, tmp_file = pfunc_nupack_(seq, version=version, dangles=dangles, T=T,
+            return_free_energy=return_free_energy)
 
     elif pkg=='vfold':
         Z, tmp_file = pfunc_vfold_(seq, version=version, T=T, coaxial=coaxial)
@@ -87,7 +95,7 @@ def pfunc(seq, package='vienna_2', T=37,
         return Z
 
 def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=None,
-                                    dangles=True, bpps=False, reweight=None, return_free_energy=False):
+                dangles=True, bpps=False, reweight=None, return_free_energy=False):
     """get partition function structure representation and Z
 
     Args:
@@ -174,7 +182,8 @@ def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_fil
     else: # return Z
         return np.exp(-1*free_energy/(.0019899*(273+T))), output_dot_ps_file
 
-def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False, param_file=None):
+def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False,
+         param_file=None, return_free_energy=False):
     """get partition function structure representation and free energy
 
     Args:
@@ -231,11 +240,15 @@ def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False, param
 
     if not bpps:
         logZ = float(stdout.decode('utf-8').rstrip().split()[-1])
-        return np.exp(logZ), None
+
+        if return_free_energy:
+            return -1*logZ, None
+        else:
+            return np.exp(logZ), None
     else:
         return 0, posterior_fname
 
-def pfunc_rnasoft_(seq, version='99', T=37, constraint=None, bpps=False):
+def pfunc_rnasoft_(seq, version='99', T=37, constraint=None, bpps=False, return_free_energy=False):
     DIR = package_locs['rnasoft']
 
     if not version: version='blstar'
@@ -274,9 +287,14 @@ def pfunc_rnasoft_(seq, version='99', T=37, constraint=None, bpps=False):
     if p.returncode:
         raise Exception('RNAsoft partition failed: on %s\n%s' % (seq, stderr))
 
-    return float(stdout.decode('utf-8').split('\n')[1].split()[-1]), bpps_fname
+    Z = float(stdout.decode('utf-8').split('\n')[1].split()[-1])
 
-def pfunc_nupack_(seq, version='95', T=37, dangles=True):
+    if return_free_energy:
+        return -1*np.log(Z), bpps_fname
+    else:
+        return Z, bpps_fname
+
+def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=False):
 
     if not version: version='95'
     nupack_materials={'95': 'rna1995', '99': 'rna1999', 'dna':'dna1998'}
@@ -290,7 +308,8 @@ def pfunc_nupack_(seq, version='95', T=37, dangles=True):
 
     seqfile = write([seq])
 
-    command=['%s/pfunc' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T), '-material', nupack_materials[version], '-dangles', dangle_option]
+    command=['%s/pfunc' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T),
+     '-material', nupack_materials[version], '-dangles', dangle_option]
 
     if DEBUG: print(' '.join(command))
     p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
@@ -306,13 +325,18 @@ def pfunc_nupack_(seq, version='95', T=37, dangles=True):
     if p.returncode:
         raise Exception('Nupack pfunc failed: on %s\n%s' % (seq, stderr))
 
+    free_energy = float(stdout.decode('utf-8').split('\n')[-3])
     Z=float(stdout.decode('utf-8').split('\n')[-2])
 
     os.remove(seqfile)
 
-    return Z, None
+    if return_free_energy:
+        return free_energy, None
+    else:
+        return Z, None
 
-def pfunc_rnastructure_(seq, version=None, T=37, constraint=None, coaxial=True,bpps=False):
+def pfunc_rnastructure_(seq, version=None, T=37, constraint=None, coaxial=True,
+                            bpps=False, return_free_energy=False):
     """get partition function structure representation and free energy
 
     Args:
@@ -375,7 +399,10 @@ def pfunc_rnastructure_(seq, version=None, T=37, constraint=None, coaxial=True,b
         if DEBUG: print(stdout.decode('utf-8').split('\n')[3])
         free_energy = float(stdout.decode('utf-8').split('\n')[3].split(' ')[-2])
 
-        return np.exp(-1*free_energy/(.0019*(273+T))), pfsfile
+        if return_free_energy:
+            return free_energy, pfsfile
+        else:
+            return np.exp(-1*free_energy/(.0019*(273+T))), pfsfile
     else:
         return 0, pfsfile
 

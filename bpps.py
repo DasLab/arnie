@@ -5,7 +5,7 @@ import numpy as np
 from .utils import *
 from .pfunc import pfunc
 
-DEBUG=True
+DEBUG=False
 
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()

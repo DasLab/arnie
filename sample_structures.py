@@ -72,7 +72,7 @@ def sample_vienna_(seq, n_samples=10, T=37, version='2', constraint=None,
     if constraint is not None:
         fname = write([seq, constraint])
         command.append('-C')
-        command.append('--enforceConstraint')
+        #command.append('--enforceConstraint')
     else:
         fname = write([seq])
 
