@@ -62,7 +62,6 @@ def get_expected_accuracy(dbn_string, bp_matrix, mode='mcc'):
     print('Error: mode not understood.')
 
 
-
 def get_mean_base_pair_propensity(dbn_string):
     '''Measure of base pair locality.'''
     mat = convert_dotbracket_to_matrix(dbn_string)

@@ -7,13 +7,17 @@ Hannah Wayment-Steele
 
 ## Organization:
 
-`examples`: example jupyter notebooks with usage.
+`notebooks`: example jupyter notebooks with usage.
 
 `scripts`: scripts for processing sequences in batch.
+
+`parameter_files`: dir of various parameter files for packages, put here out of convenience.
 
 `test`: unit tests (still in work)
 
 `mea`: code for computing Maximum Expected Accuracy structures.
+
+`RNAGraph`: Code to process secondary structures as graph objects [here until a better repo location becomes clear] 
 
 ## Usage:
 
