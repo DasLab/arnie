@@ -33,16 +33,18 @@ See `examples/start_here.ipynb` for example syntax. In brief, comparing across p
 
 ```
 from arnie.bpps import bpps
-%pylab inline
-example_seq = 'GGGGAAAACCCC'
 
 bpps={}
 
 for pkg in ['vienna','nupack','RNAstructure','contrafold','RNAsoft']:
-    bpps[package] = bpps(example_seq, package=pkg)
-    
-imshow(bpps['vienna'])
+    bpps[package] = bpps(my_sequence, package=pkg)
 ```
+![](assets/example_base_pair_matrices.png)
+
+Can also analyze as average base pairing per nucleotide:
+
+![](assets/example_avg_bp_per_nucleotide.png)
+
 
 ## Coming soon
 
