@@ -3,15 +3,15 @@ Python API to compute RNA energetics and do structure prediction across multiple
 
 Currently supported:
 
-Vienna^1 [https://www.tbi.univie.ac.at/RNA/#download]
+Vienna \[1\] [https://www.tbi.univie.ac.at/RNA/#download]
 
-NUPACK^2 [http://www.nupack.org/downloads]
+NUPACK \[2\] [http://www.nupack.org/downloads]
 
-RNAstructure^3 [https://rna.urmc.rochester.edu/RNAstructure.html]
+RNAstructure \[3\] [https://rna.urmc.rochester.edu/RNAstructure.html]
 
-RNAsoft^4 [http://www.rnasoft.ca/download.html]
+RNAsoft \[4\] [http://www.rnasoft.ca/download.html]
 
-CONTRAfold^5 [http://contra.stanford.edu/contrafold/]
+CONTRAfold \[5\] [http://contra.stanford.edu/contrafold/]
 
 (c) 2020 Leland Stanford Jr University
 
