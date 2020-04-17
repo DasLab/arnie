@@ -1,8 +1,9 @@
 # arnie
 Python API to compute RNA energetics and do structure prediction from all available packages.
 
-Das Lab, 2019
+(c) 2020 Leland Stanford Jr University
 
+Authors:
 Hannah Wayment-Steele
 
 ## Organization:
@@ -17,7 +18,7 @@ Hannah Wayment-Steele
 
 `mea`: code for computing Maximum Expected Accuracy structures.
 
-`RNAGraph`: Code to process secondary structures as graph objects [here until a better repo location becomes clear] 
+`RNAGraph`: Code to process secondary structures as graph objects (here until a better repo location becomes clear)
 
 ## Usage:
 
@@ -43,10 +44,6 @@ for pkg in ['vienna','nupack','RNAstructure','contrafold','RNAsoft']:
 imshow(bpps['vienna'])
 ```
 
-## Riboswitch fold change:
-
-See `examples/riboswitch_fold_change.ipynb` for example k_d prediction and fold change prediction.
-
 ## Coming soon
 
-Help for compiling packages
+Pointers for compiling packages
