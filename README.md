@@ -1,8 +1,9 @@
 # arnie
 Python API to compute RNA energetics and do structure prediction from all available packages.
 
-Das Lab, 2019
+(c) 2020 Leland Stanford Jr University
 
+Authors:
 Hannah Wayment-Steele
 
 ## Organization:
@@ -17,7 +18,7 @@ Hannah Wayment-Steele
 
 `mea`: code for computing Maximum Expected Accuracy structures.
 
-`RNAGraph`: Code to process secondary structures as graph objects [here until a better repo location becomes clear] 
+`RNAGraph`: Code to process secondary structures as graph objects (here until a better repo location becomes clear)
 
 ## Usage:
 
@@ -32,21 +33,19 @@ See `examples/start_here.ipynb` for example syntax. In brief, comparing across p
 
 ```
 from arnie.bpps import bpps
-%pylab inline
-example_seq = 'GGGGAAAACCCC'
 
 bpps={}
 
 for pkg in ['vienna','nupack','RNAstructure','contrafold','RNAsoft']:
-    bpps[package] = bpps(example_seq, package=pkg)
-    
-imshow(bpps['vienna'])
+    bpps[package] = bpps(my_sequence, package=pkg)
 ```
+![](assets/example_base_pair_matrices.png)
 
-## Riboswitch fold change:
+Can also analyze as average base pairing per nucleotide:
 
-See `examples/riboswitch_fold_change.ipynb` for example k_d prediction and fold change prediction.
+![](assets/example_avg_bp_per_nucleotide.png)
+
 
 ## Coming soon
 
-Help for compiling packages
+Pointers for compiling packages
