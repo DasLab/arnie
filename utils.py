@@ -447,8 +447,9 @@ def package_list():
   package_dct = load_package_locations()
   for key,v in package_dct.items():
     if key != "TMP":
-      if v != "None":
-        pkg_list.append(key)
+      if not key.startswith('linear'):
+        if v != "None":
+          pkg_list.append(key)
   return pkg_list
 
 def load_package_locations():
