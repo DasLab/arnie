@@ -11,7 +11,7 @@ package_locs = load_package_locations()
 
 def pfunc(seq, package='vienna_2', T=37,
     constraint=None, motif=None, linear=False,
-    dangles=True, noncanonical=False,
+    dangles=True, noncanonical=False, pseudo=False,
     bpps=False, param_file=None, coaxial=True, reweight=None,return_free_energy = False):
     ''' Compute partition function for RNA sequence.
 
@@ -21,6 +21,7 @@ def pfunc(seq, package='vienna_2', T=37,
         constraint (str): structure constraints
         motif (str): argument to vienna motif 
         linear (bool): call LinearPartition to estimate Z in Vienna or Contrafold
+        pseudo (bool): nupack only, make prediction with pseudoknots
         dangles (bool): dangles or not, specifiable for vienna, nupack
         coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
         noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
@@ -44,6 +45,9 @@ def pfunc(seq, package='vienna_2', T=37,
             print('Warning: %s does not support coaxial options' % pkg)
         if linear and pkg not in ['vienna','contrafold']:
             print('Warning: LinearPartition only implemented for vienna and contrafold.')
+
+    if pseudo and pkg !='nupack':
+        raise ValueError('pseudo only for use with nupack')
 
     if pkg=='vienna':
         if linear:
@@ -75,7 +79,7 @@ def pfunc(seq, package='vienna_2', T=37,
          bpps=bpps,return_free_energy=return_free_energy)
 
     elif pkg=='nupack':
-        Z, tmp_file = pfunc_nupack_(seq, version=version, dangles=dangles, T=T,
+        Z, tmp_file = pfunc_nupack_(seq, version=version, dangles=dangles, T=T, pseudo=pseudo,
             return_free_energy=return_free_energy)
 
     elif pkg=='vfold':
@@ -294,7 +298,7 @@ def pfunc_rnasoft_(seq, version='99', T=37, constraint=None, bpps=False, return_
     else:
         return Z, bpps_fname
 
-def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=False):
+def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=False, pseudo=False):
 
     if not version: version='95'
     nupack_materials={'95': 'rna1995', '99': 'rna1999', 'dna':'dna1998'}
@@ -311,6 +315,8 @@ def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=Fals
     command=['%s/pfunc' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T),
      '-material', nupack_materials[version], '-dangles', dangle_option]
 
+    if pseudo:
+        command.append('--pseudo')
     if DEBUG: print(' '.join(command))
     p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
 

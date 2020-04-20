@@ -10,7 +10,7 @@ DEBUG=False
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
 
-def bpps(sequence, package='vienna', constraint=None,
+def bpps(sequence, package='vienna', constraint=None, pseudo=False,
          T=37, coaxial=True, linear=False,
         motif=None, dangles=True,param_file=None,reweight=None):
     ''' Compute base pairing probability matrix for RNA sequence.
@@ -21,6 +21,7 @@ def bpps(sequence, package='vienna', constraint=None,
     linear (bool): call LinearPartition to estimate Z in Vienna or Contrafold
     constraint (str): structure constraint (functional in vienna, contrafold, rnastructure)
     motif (str): argument to vienna motif
+    pseudo (bool): (NUPACK only) include pseudoknot calculation
     dangles (bool): dangles or not, specifiable for vienna, nupack
     coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
     noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
@@ -39,6 +40,9 @@ def bpps(sequence, package='vienna', constraint=None,
     if motif is not None and pkg != 'vienna':
         raise ValueError('motif option can only be used with Vienna.')
 
+    if pseudo and pkg != 'nupack':
+        raise ValueError('pseudoknot option only implemented with Nupack.')
+
     if not dangles and pkg not in ['vienna','nupack']:
         print('Warning: %s does not support dangles options' % pkg)
     if not coaxial and pkg not in ['rnastructure','vfold']:
@@ -47,7 +51,7 @@ def bpps(sequence, package='vienna', constraint=None,
         print('Warning: LinearPartition only implemented for vienna and contrafold.')
 
     if pkg=='nupack':
-        return bpps_nupack_(sequence, version = version, dangles = dangles, T = T)
+        return bpps_nupack_(sequence, version = version, dangles = dangles, T = T, pseudo=pseudo)
     elif pkg=='vfold':
         return bpps_vfold_(sequence, version = version, T = T, coaxial = coaxial)
     else:
@@ -123,7 +127,7 @@ def bpps_rnasoft_(sequence, tmp_file):
 
     return probs
 
-def bpps_nupack_(sequence, version='95', T=37, dangles=True):
+def bpps_nupack_(sequence, version='95', T=37, dangles=True, pseudo=False):
 
     if not version: version='95'
     
@@ -141,6 +145,8 @@ def bpps_nupack_(sequence, version='95', T=37, dangles=True):
     command=['%s/pairs' % DIR, '%s' % seqfile.replace('.in',''),
       '-T', str(T), '-material', nupack_materials[version], '-dangles', dangle_option]
 
+    if pseudo:
+        command.append('--pseudo')
     p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
 
     stdout, stderr = p.communicate()
