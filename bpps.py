@@ -5,7 +5,7 @@ import numpy as np
 from .utils import *
 from .pfunc import pfunc
 
-DEBUG=True
+DEBUG=False
 
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
@@ -43,8 +43,8 @@ def bpps(sequence, package='vienna', constraint=None,
         print('Warning: %s does not support dangles options' % pkg)
     if not coaxial and pkg not in ['rnastructure','vfold']:
         print('Warning: %s does not support coaxial options' % pkg)
-    if linear and pkg not in ['vienna','contrafold']:
-        print('Warning: LinearPartition only implemented for vienna and contrafold.')
+    if linear and pkg not in ['vienna','contrafold','eternafold']:
+        print('Warning: LinearPartition only implemented for vienna, contrafold, eternafold.')
 
     if pkg=='nupack':
         return bpps_nupack_(sequence, version = version, dangles = dangles, T = T)
@@ -63,6 +63,8 @@ def bpps(sequence, package='vienna', constraint=None,
 
             if 'contrafold' in package:
                 return bpps_contrafold_(sequence, tmp_file)
+            if package=='eternafold':
+                return bpps_contrafold_(sequence, tmp_file)                
             elif 'vienna' in package:
                 return bpps_vienna_(sequence, tmp_file)
             elif 'rnasoft' in package:
@@ -260,15 +262,14 @@ def bpps_linearpartition_(sequence, tmp_file):
 
     probs=np.zeros([len(sequence), len(sequence)])
 
-    for line in open(fname).readlines():
-        print(line)
-        first_ind, second_ind, p = line.split(' ')
-        first_ind = int(first_ind)-1
-        second_ind = int(second_ind)-1
-        p = float(p)
-        probs[first_ind, second_ind] = p
-        probs[second_ind, first_ind] = p
-
+    for line in open(fname,'r').readlines():
+        if len(line.strip())>0:
+            first_ind, second_ind, p = line.strip().split(' ')
+            first_ind = int(first_ind)-1
+            second_ind = int(second_ind)-1
+            p = float(p)
+            probs[first_ind, second_ind] = p
+            probs[second_ind, first_ind] = p
 
     os.remove(fname)
 
