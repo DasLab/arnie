@@ -47,8 +47,8 @@ def mfe(seq, package='vienna_2', T=37,
         if not coaxial and pkg not in ['rnastructure', 'vfold']:
             print('Warning: %s does not support coaxial options' % pkg)
 
-    if linear and pkg not in ['vienna','contrafold']:
-        print('Warning: LinearFold only implemented for vienna and contrafold.')
+    if linear and pkg not in ['vienna','contrafold','eternafold']:
+        print('Warning: LinearFold only implemented for vienna, contrafold, eternafold.')
 
     if pkg=='vienna':
         if linear:
@@ -61,6 +61,12 @@ def mfe(seq, package='vienna_2', T=37,
             struct = mfe_linearfold_(seq, package='contrafold')
         else:
             struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=param_file,viterbi=viterbi)
+
+    elif pkg=='eternafold':
+        if linear:
+            struct = mfe_linearfold_(seq, package='eternafold')
+        else:
+            struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=package_locs['eternafoldparams'],viterbi=viterbi)
 
     else:
         raise ValueError('package %s not understood.' % package)
@@ -124,7 +130,7 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
     if p.returncode:
         raise Exception('RNAfold failed: on %s\n%s' % (seq, stderr))
     os.remove(fname)
-    os.remove('rna.ps')
+    #os.remove('rna.ps')
 
     if 'omitting constraint' in stderr.decode('utf-8'):
         raise ValueError('Constraint caused impossible structure')
