@@ -62,7 +62,6 @@ def get_expected_accuracy(dbn_string, bp_matrix, mode='mcc'):
     print('Error: mode not understood.')
 
 
-
 def get_mean_base_pair_propensity(dbn_string):
     '''Measure of base pair locality.'''
     mat = convert_dotbracket_to_matrix(dbn_string)
@@ -448,8 +447,9 @@ def package_list():
   package_dct = load_package_locations()
   for key,v in package_dct.items():
     if key != "TMP":
-      if v != "None":
-        pkg_list.append(key)
+      if not key.startswith('linear'):
+        if v != "None":
+          pkg_list.append(key)
   return pkg_list
 
 def load_package_locations():

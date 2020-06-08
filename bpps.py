@@ -5,12 +5,12 @@ import numpy as np
 from .utils import *
 from .pfunc import pfunc
 
-DEBUG=True
+DEBUG=False
 
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
 
-def bpps(sequence, package='vienna', constraint=None,
+def bpps(sequence, package='vienna', constraint=None, pseudo=False,
          T=37, coaxial=True, linear=False,
         motif=None, dangles=True,param_file=None,reweight=None):
     ''' Compute base pairing probability matrix for RNA sequence.
@@ -21,6 +21,7 @@ def bpps(sequence, package='vienna', constraint=None,
     linear (bool): call LinearPartition to estimate Z in Vienna or Contrafold
     constraint (str): structure constraint (functional in vienna, contrafold, rnastructure)
     motif (str): argument to vienna motif
+    pseudo (bool): (NUPACK only) include pseudoknot calculation
     dangles (bool): dangles or not, specifiable for vienna, nupack
     coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
     noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
@@ -39,15 +40,18 @@ def bpps(sequence, package='vienna', constraint=None,
     if motif is not None and pkg != 'vienna':
         raise ValueError('motif option can only be used with Vienna.')
 
+    if pseudo and pkg != 'nupack':
+        raise ValueError('pseudoknot option only implemented with Nupack.')
+
     if not dangles and pkg not in ['vienna','nupack']:
         print('Warning: %s does not support dangles options' % pkg)
     if not coaxial and pkg not in ['rnastructure','vfold']:
         print('Warning: %s does not support coaxial options' % pkg)
-    if linear and pkg not in ['vienna','contrafold']:
-        print('Warning: LinearPartition only implemented for vienna and contrafold.')
+    if linear and pkg not in ['vienna','contrafold','eternafold']:
+        print('Warning: LinearPartition only implemented for vienna, contrafold, eternafold.')
 
     if pkg=='nupack':
-        return bpps_nupack_(sequence, version = version, dangles = dangles, T = T)
+        return bpps_nupack_(sequence, version = version, dangles = dangles, T = T, pseudo=pseudo)
     elif pkg=='vfold':
         return bpps_vfold_(sequence, version = version, T = T, coaxial = coaxial)
     else:
@@ -63,6 +67,8 @@ def bpps(sequence, package='vienna', constraint=None,
 
             if 'contrafold' in package:
                 return bpps_contrafold_(sequence, tmp_file)
+            if package=='eternafold':
+                return bpps_contrafold_(sequence, tmp_file)                
             elif 'vienna' in package:
                 return bpps_vienna_(sequence, tmp_file)
             elif 'rnasoft' in package:
@@ -123,7 +129,7 @@ def bpps_rnasoft_(sequence, tmp_file):
 
     return probs
 
-def bpps_nupack_(sequence, version='95', T=37, dangles=True):
+def bpps_nupack_(sequence, version='95', T=37, dangles=True, pseudo=False):
 
     if not version: version='95'
     
@@ -141,6 +147,8 @@ def bpps_nupack_(sequence, version='95', T=37, dangles=True):
     command=['%s/pairs' % DIR, '%s' % seqfile.replace('.in',''),
       '-T', str(T), '-material', nupack_materials[version], '-dangles', dangle_option]
 
+    if pseudo:
+        command.append('--pseudo')
     p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
 
     stdout, stderr = p.communicate()
@@ -260,15 +268,14 @@ def bpps_linearpartition_(sequence, tmp_file):
 
     probs=np.zeros([len(sequence), len(sequence)])
 
-    for line in open(fname).readlines():
-        print(line)
-        first_ind, second_ind, p = line.split(' ')
-        first_ind = int(first_ind)-1
-        second_ind = int(second_ind)-1
-        p = float(p)
-        probs[first_ind, second_ind] = p
-        probs[second_ind, first_ind] = p
-
+    for line in open(fname,'r').readlines():
+        if len(line.strip())>0:
+            first_ind, second_ind, p = line.strip().split(' ')
+            first_ind = int(first_ind)-1
+            second_ind = int(second_ind)-1
+            p = float(p)
+            probs[first_ind, second_ind] = p
+            probs[second_ind, first_ind] = p
 
     os.remove(fname)
 

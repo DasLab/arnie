@@ -4,7 +4,7 @@ from arnie.mea.mea_utils import *
 from copy import copy
 
 class MEA:
-    def __init__(self, bpps, gamma = 1.0, debug=False, run_probknot_heuristic = False, theta=0):
+    def __init__(self, bpps, gamma = 1.0, debug=False, run_probknot_heuristic = False, theta=0, stochastic=False):
         self.debug = debug
         self.bpps = bpps
         self.N=self.bpps.shape[0]
@@ -17,6 +17,7 @@ class MEA:
         self.tb = np.zeros([self.N, self.N])
         self.min_hp_length = 3
         self.evaluated = False
+        self.stochastic = stochastic
 
         if run_probknot_heuristic:
             self.run_ProbKnot()
@@ -24,11 +25,23 @@ class MEA:
             self.run_MEA()
         
     def fill_W(self, i, j):
-        options = [self.W[i+1, j], self.W[i, j-1], (self.gamma+1)*self.bpps[i,j] + self.W[i+1, j-1] - 1,\
-                np.max([self.W[i,k] + self.W[k+1, j] for k in range(i+1,j)])]
-        self.W[i,j] = np.max(options) 
-        self.tb[i,j] = np.argmax(options) #0: 5' pass, 1: 3' pass, 2: bp, 3: multiloop
-        
+        if self.stochastic:
+            options = [self.W[i+1, j], self.W[i, j-1],\
+             (self.gamma+1)*self.bpps[i,j] + self.W[i+1, j-1] - 1,\
+            np.max([self.W[i,k] + self.W[k+1, j] for k in range(i+1,j)])]
+            option_wts = options - np.min(options)
+            option_wts /= np.sum(option_wts)
+            selection = np.random.choice([0,1,2,3],p=option_wts)
+            self.W[i,j] = options[selection]
+            self.tb[i,j] = selection #0: 5' pass, 1: 3' pass, 2: bp, 3: multiloop
+
+        else:
+            options = [self.W[i+1, j], self.W[i, j-1],\
+             (self.gamma+1)*self.bpps[i,j] + self.W[i+1, j-1] - 1,\
+            np.max([self.W[i,k] + self.W[k+1, j] for k in range(i+1,j)])]
+            self.W[i,j] = np.max(options) 
+            self.tb[i,j] = np.argmax(options) #0: 5' pass, 1: 3' pass, 2: bp, 3: multiloop
+            
     def run_MEA(self):
         # fill weight matrix
         for length in range(self.min_hp_length, self.N):

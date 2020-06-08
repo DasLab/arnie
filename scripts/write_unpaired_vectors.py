@@ -11,8 +11,7 @@ if __name__=='__main__':
     p.add_argument("seq_dir", nargs='+',
                    help="path to dir of *.seq files")
     p.add_argument("-o", help="name of output dir")
-    p.add_argument("-p", "--package", choices=['vienna_2', 'contrafold_se', 'nupack_95'], default='vienna_2',
-                   help="Package to use")
+    p.add_argument("-p", "--package", default='vienna_2', help="Package to use")
 
     if len(sys.argv)==1:
         p.print_help(sys.stderr)
