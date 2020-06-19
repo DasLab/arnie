@@ -473,7 +473,7 @@ def pfunc_vfold_(seq, version='0', T=37, coaxial=True, bpps=False):
     #output: take second field of last line for Z 
 
 
-def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=10):
+def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100):
 
     LOC = package_locs['linearpartition']
     tmp_file = filename()
