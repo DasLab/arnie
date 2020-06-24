@@ -13,7 +13,8 @@ def mfe(seq, package='vienna_2', T=37,
     constraint=None, motif=None,
     linear=False,
     dangles=True, noncanonical=False,
-    bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False):
+    bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False,
+    shape_signal=None, dms_signal=None, pk=False):
     ''' Compute MFE structure (within package) for RNA sequence.
     Note: this is distinct from the arnie MEA codebase, which takes any base pair probability matrix and computes the maximum expected accuracy structure.
     That said, Contrafold's default structure prediction is an MEA structure, not MFE.  In this module, calling Contrafold returns the default MEA structure unless the 
@@ -68,13 +69,18 @@ def mfe(seq, package='vienna_2', T=37,
         else:
             struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=package_locs['eternafoldparams'],viterbi=viterbi)
 
+    elif pkg=='rnastructure':
+        if linear:
+            raise ValueError('package %s is not supported with linearfold.' % package)
+        else:
+            struct = mfe_rnastructure_(seq, version=version, T=T, constraint=constraint, param_file=param_file, shape_signal=shape_signal, dms_signal=dms_signal, pk=pk)
     else:
         raise ValueError('package %s not understood.' % package)
 
     return struct
 
 def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=None, dangles=True, reweight=None):
-    """get partition function structure representation and Z
+    """get minimum free energy structure with Vienna
 
     Args:
         seq (str): nucleic acid sequence
@@ -82,7 +88,7 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
         constraint (str): structure constraints
         motif (str): argument to vienna motif  
     Returns
-        str, float: secondary structure representation and Z
+        str: secondary structure representation for MFE
     """
 
     if not version:
@@ -138,8 +144,107 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
         return stdout.decode('utf-8').split('\n')[1].split(' ')[0]
 
 
+
+def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None, shape_signal=None, dms_signal=None, pk=False):
+    """get minimum free energy structure
+        with SHAPE or DMS data, uses the default slope and intercept in RNAStructure
+
+    Args:
+        seq (str): nucleic acid sequence
+        T (float): temperature
+    Returns
+        float: MFE structure
+    """
+    if param_file is not None:
+        raise ValueError('Cannot run RNAstructure with non-default RNA parameters as specified in: %s' % param_file)
+    if version is not None:
+        raise ValueError('Cannot run RNAstructure with non-default version: %s' % version)
+
+    LOC=package_locs['rnastructure']
+
+    seq_file = write(['>sequence', seq])
+    ct_fname = '%s.ct' % filename()
+
+    command = []
+    if not pk:
+        command = command + ['%s/Fold' % LOC, seq_file, ct_fname, '-T', T + 273.15]
+    else:
+        command = command + ['%s/ShapeKnots' % LOC, seq_file, ct_fname]
+        if dms_signal is not None:
+            raise ValueError('Cannot run RNAstructure with DMS signal and pseudoknots.')
+        if constraint is not None:
+            raise ValueError('Cannot run RNAstructure with constraints and pseudoknots.')
+    
+    con_fname = None
+    dms_fname = None
+    shape_fname = None
+
+    if constraint is not None:
+        con_fname = '%s.CON' % filename()
+        convert_dbn_to_RNAstructure_input(seq, constraint, con_fname)
+        command.extend(['--constraint', con_fname])
+
+    if dms_signal is not None:
+        dms_fname = write_reactivity_file(dms_signal)
+        command.extend(['--DMS', dms_fname])
+
+    if shape_signal is not None:
+        shape_fname = write_reactivity_file(shape_signal)
+        command.extend(['--SHAPE', shape_fname])
+
+    if DEBUG: print(' '.join(command))
+
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+
+    stdout, stderr = p.communicate()
+
+    if DEBUG:
+        print('stdout')
+        print(stdout)
+        print('stderr')
+        print(stderr)
+    if p.returncode:
+        raise Exception('RNAstructure failed: on %s\n%s' % (seq, stderr))
+
+    if con_fname is not None:
+        os.remove(con_fname)
+    if dms_fname is not None:
+        os.remove(dms_fname)
+    if shape_fname is not None:
+        os.remove(shape_fname)
+    if seq_file is not None:
+        os.remove(seq_file)
+
+    dot_file = '%s.dbn' % filename()
+    command = ['%s/ct2dot' % LOC, ct_fname, 1, dot_file]
+
+    if DEBUG: print(' '.join(command))
+
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+
+    stdout, stderr = p.communicate()
+
+    if DEBUG:
+        print('stdout')
+        print(stdout)
+        print('stderr')
+        print(stderr)
+    if p.returncode:
+        raise Exception('RNAstructure ct2dot failed: on %s\n%s' % (seq, stderr))
+
+    f = open(dot_file)
+    dot_lines = f.readlines()        
+    f.close()
+
+    mfe_struct = dot_lines[-1].strip('\n')
+
+    os.remove(ct_file)
+    os.remove(dot_file)
+
+    return mfe_struct
+
 def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,viterbi=False):
-    """get partition function structure representation and free energy
+    """get MFE structure for Contrafold
 
     Args:
         seq (str): nucleic acid sequence
@@ -147,8 +252,7 @@ def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,vit
         constraint (str): structure constraints
         motif (str): argument to vienna motif  
     Returns
-        float: partition function
-        Note: If the constraint is impossible then Z wil be equal to the Z unconstrained
+        secondary structure dot-bracket string for MFE
     """
     if not version: version='2'
 

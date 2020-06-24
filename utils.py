@@ -403,6 +403,24 @@ def get_missing_motif_bases(seq):
 
   return seq[a], seq[b]
 
+def write_reactivity_file(reactivities, fname=None):
+  """ writes reactivities (either SHAPE or DMS) to file format used by RNAstructure
+
+  Args:
+    reactivities (list): a list of normalized reactivity float data. 
+    Negative numbers can be used to indicate no signal.
+  """
+  if fname is None:
+    fname = '%s.SHAPE' % filename()
+  with open(fname, 'w') as f:
+    i = 1
+    for reactivity in reactivities:
+      if reactivity > 0:
+        f.write('%d %f\n' % (i, reactivity))
+      i += 1
+  return fname
+
+
 def local_rand_filename(n=6):
   """generate random filename
 
