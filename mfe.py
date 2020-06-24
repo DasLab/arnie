@@ -167,7 +167,7 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
 
     command = []
     if not pk:
-        command = command + ['%s/Fold' % LOC, seq_file, ct_fname, '-T', T + 273.15]
+        command = command + ['%s/Fold' % LOC, seq_file, ct_fname, '-T', str(T + 273.15)]
     else:
         command = command + ['%s/ShapeKnots' % LOC, seq_file, ct_fname]
         if dms_signal is not None:
@@ -185,10 +185,14 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
         command.extend(['--constraint', con_fname])
 
     if dms_signal is not None:
+        if len(dms_signal) != len(seq):
+            raise RuntimeError('DMS signal used with RNAstructure must have same length as the sequence.')
         dms_fname = write_reactivity_file(dms_signal)
         command.extend(['--DMS', dms_fname])
 
     if shape_signal is not None:
+        if len(shape_signal) != len(seq):
+            raise RuntimeError('SHAPE signal used with RNAstructure must have same length as the sequence.')
         shape_fname = write_reactivity_file(shape_signal)
         command.extend(['--SHAPE', shape_fname])
 
@@ -215,8 +219,8 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
     if seq_file is not None:
         os.remove(seq_file)
 
-    dot_file = '%s.dbn' % filename()
-    command = ['%s/ct2dot' % LOC, ct_fname, 1, dot_file]
+    dot_fname = '%s.dbn' % filename()
+    command = ['%s/ct2dot' % LOC, ct_fname, "1", dot_fname]
 
     if DEBUG: print(' '.join(command))
 
@@ -232,14 +236,14 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
     if p.returncode:
         raise Exception('RNAstructure ct2dot failed: on %s\n%s' % (seq, stderr))
 
-    f = open(dot_file)
+    f = open(dot_fname)
     dot_lines = f.readlines()        
     f.close()
 
     mfe_struct = dot_lines[-1].strip('\n')
 
-    os.remove(ct_file)
-    os.remove(dot_file)
+    os.remove(ct_fname)
+    os.remove(dot_fname)
 
     return mfe_struct
 
