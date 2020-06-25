@@ -14,7 +14,7 @@ def mfe(seq, package='vienna_2', T=37,
     linear=False,
     dangles=True, noncanonical=False,
     bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False,
-    shape_signal=None, dms_signal=None, pk=False):
+    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False):
     ''' Compute MFE structure (within package) for RNA sequence.
     Note: this is distinct from the arnie MEA codebase, which takes any base pair probability matrix and computes the maximum expected accuracy structure.
     That said, Contrafold's default structure prediction is an MEA structure, not MFE.  In this module, calling Contrafold returns the default MEA structure unless the 
@@ -29,9 +29,12 @@ def mfe(seq, package='vienna_2', T=37,
         dangles (bool): dangles or not, specifiable for vienna, nupack
         coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
         noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
+        shape_signal(list): list of normalized SHAPE reactivities, with negative values indicating no signal
+        dms_signal(list): list of normalized DMS reactivities, with negative values indicating no signal
+        pk: if True, will predict pseudoknots, but only with RNAstructure
 
         Possible packages: 
-        'vienna_2', 'vienna_1','contrafold_1','contrafold_2'
+        'vienna_2', 'vienna_1','contrafold_1','contrafold_2', 'rnastructure'
         
     Returns
         string: MFE structure
@@ -73,7 +76,9 @@ def mfe(seq, package='vienna_2', T=37,
         if linear:
             raise ValueError('package %s is not supported with linearfold.' % package)
         else:
-            struct = mfe_rnastructure_(seq, version=version, T=T, constraint=constraint, param_file=param_file, shape_signal=shape_signal, dms_signal=dms_signal, pk=pk)
+            struct = mfe_rnastructure_(seq, version=version, T=T, constraint=constraint, 
+                param_file=param_file, shape_signal=shape_signal, dms_signal=dms_signal, 
+                shape_file=shape_file, dms_file=dms_file, pk=pk)
     else:
         raise ValueError('package %s not understood.' % package)
 
@@ -145,7 +150,8 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
 
 
 
-def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None, shape_signal=None, dms_signal=None, pk=False):
+def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None, 
+    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False):
     """get minimum free energy structure
         with SHAPE or DMS data, uses the default slope and intercept in RNAStructure
 
@@ -159,6 +165,10 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
         raise ValueError('Cannot run RNAstructure with non-default RNA parameters as specified in: %s' % param_file)
     if version is not None:
         raise ValueError('Cannot run RNAstructure with non-default version: %s' % version)
+    if (shape_signal is not None) and (shape_file is not None):
+        raise ValueError('Please specify SHAPE reactivities either as a list or in a SHAPE reactivity file')
+    if (dms_signal is not None) and (dms_signal is not None):
+        raise ValueError('Please specify DMS reactivities either as a list or in a DMS reactivity file')
 
     LOC=package_locs['rnastructure']
 
@@ -190,11 +200,17 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
         dms_fname = write_reactivity_file(dms_signal)
         command.extend(['--DMS', dms_fname])
 
+    if dms_file is not None:
+        command.extend(['--DMS', dms_file])
+
     if shape_signal is not None:
         if len(shape_signal) != len(seq):
             raise RuntimeError('SHAPE signal used with RNAstructure must have same length as the sequence.')
         shape_fname = write_reactivity_file(shape_signal)
         command.extend(['--SHAPE', shape_fname])
+
+    if shape_file is not None:
+        command.extend(['--SHAPE', shape_file])
 
     if DEBUG: print(' '.join(command))
 
