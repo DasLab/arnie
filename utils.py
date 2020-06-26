@@ -281,6 +281,39 @@ def prune_combo_list(combo_list, apt_idx_list, N_frag):
   final_combo_list = combo_list[final_idx_list]
   return np.array(final_combo_list)
 
+def get_bpp_from_dbn(dbn_struct):
+  """ Gets a base-pairing matrix from a dot-bracket notation structure
+  The matrix has 1's at position i,j if sequence positions i,j are base-paired
+  and 0 otherwise.
+
+  Args: 
+    dbn_struct - structure in MFE format
+  Return:
+    2D numpy array
+  """
+
+  bpp_matrix = np.zeros((len(dbn_struct), len(dbn_struct)))
+
+  bkt_open = "(<{"
+  bkt_close = ")>}"
+
+  for ii in range(len(bkt_open)):
+    open_char = bkt_open[ii]
+    close_char = bkt_close[ii]
+
+    open_pos = []
+    
+    for jj in range(len(dbn_struct)):
+      if dbn_struct[jj] == open_char:
+        open_pos += [jj]
+      if dbn_struct[jj] == close_char:
+        pair = open_pos[-1]
+        del open_pos[-1]
+        bpp_matrix[jj,pair] = 1
+        bpp_matrix[pair,jj] = 1
+
+  return bpp_matrix
+
 def flip_ss(ss):
   """ Flips a secondary structure 
   Only flips the unpaired bases
@@ -402,6 +435,24 @@ def get_missing_motif_bases(seq):
   #print(seq.find(FMN_apt2), b)
 
   return seq[a], seq[b]
+
+def write_reactivity_file(reactivities, fname=None):
+  """ writes reactivities (either SHAPE or DMS) to file format used by RNAstructure
+
+  Args:
+    reactivities (list): a list of normalized reactivity float data. 
+    Negative numbers can be used to indicate no signal.
+  """
+  if fname is None:
+    fname = '%s.SHAPE' % filename()
+  with open(fname, 'w') as f:
+    i = 1
+    for reactivity in reactivities:
+      if reactivity > 0:
+        f.write('%d %f\n' % (i, reactivity))
+      i += 1
+  return fname
+
 
 def local_rand_filename(n=6):
   """generate random filename
