@@ -18,6 +18,8 @@ CONTRAfold \[5\] [http://contra.stanford.edu/contrafold/]
 Authors:
 Hannah Wayment-Steele
 
+Note: RNAGraph repo is deprecated, see https://github.com/DasLab/RiboGraphViz/ for current version of the code.
+
 ## Organization:
 
 `notebooks`: example jupyter notebooks with usage.
