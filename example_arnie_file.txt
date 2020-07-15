@@ -7,11 +7,9 @@ rnastructure: /home/users/hannahw1/secstruct_software/RNAstructure/exe
 rnasoft: /home/users/hannahw1/secstruct_software/MultiRNAFold
 contrafold_1: /home/users/hannahw1/secstruct_software/contrafold_v1_10/src
 contrafold_2: /home/users/hannahw1/secstruct_software/contrafold_v2_02/src
-contrafold_se: /home/users/hannahw1/secstruct_software/contrafold-se/src_mono
 vienna_2: /home/users/hannahw1/secstruct_software/ViennaRNA-2.4.10/src/bin
 vienna_1: /home/users/hannahw1/secstruct_software/ViennaRNA-1.8.5/bin
 nupack: /home/users/hannahw1/secstruct_software/nupack3.2.2/build/bin
-vfold: /home/users/hannahw1/secstruct_software/Vfold201409
 
 #TMP: location for tmp files for packages. Update to where you want your tmp files stored.
 TMP: /scratch/users/hannahw1/tmp
