@@ -18,7 +18,6 @@ CONTRAfold \[5\] [http://contra.stanford.edu/contrafold/]
 Authors:
 Hannah Wayment-Steele
 
-Note: RNAGraph repo is deprecated, see https://github.com/DasLab/RiboGraphViz/ for current version of the code.
 
 ## Organization:
 
@@ -32,7 +31,7 @@ Note: RNAGraph repo is deprecated, see https://github.com/DasLab/RiboGraphViz/ f
 
 `mea`: code for computing Maximum Expected Accuracy structures.
 
-`RNAGraph`: Code to process secondary structures as graph objects (here until a better repo location becomes clear)
+`RNAGraph`: DEPRECATED, see https://github.com/DasLab/RiboGraphViz/ for current version of the code. Code to process and visualize secondary structures as graph objects.
 
 ## Usage:
 
