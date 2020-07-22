@@ -4,19 +4,15 @@
 
 Arnie is a set of wrappers to call other packages. So in order for Arnie to work right, we have to do a little bit of lifting at the start to 1) download and compile those packages, and 2) tell Arnie where they are in our arnie.rc file.
 
-Below is a set of notes with instructions / tips for installing packages on Mac and Linux.
+Below is a set of notes with instructions / tips for installing packages on Mac and Linux. There are many more ways to do this! This is just what I (HKWS) have found to work and have recently tested.
 
-*Disclaimer*: There are many more ways to do this! This is just what I (HKWS) have found to work and have recently tested.
+You don't have to install all of the packages described here for arnie to work. At a minimum, setting up Vienna is required. Beyond that, your needs will dictate what other packages you set up.
 
-*You don't have to install all of the packages described here for arnie to work.* 
+- Desire more accurate thermodynamic predictions? Set up EternaFold
 
-At a minimum, setting up Vienna is required. Beyond that, your needs will dictate what other packages you set up.
+- Running RNAStructure + SHAPE? Set up RNAstructure (Thanks to Ramya Rangan!)
 
-Desire more accurate thermodynamic predictions? Set up EternaFold (CONTRAfold + EternaFold params)
-
-Running RNAStructure + SHAPE? Set up RNAstructure (Thanks to Ramya Rangan!)
-
-Benchmarking packages / skeptic of all?  Set up all of them!
+- Benchmarking packages / skeptic of all?  Set up all of them!
 
 This document contains instructions to download, compile, and set paths for all of the following packages:
 
@@ -61,11 +57,7 @@ Download a precompiled binary from [https://www.tbi.univie.ac.at/RNA/#download](
 
 ![](doc_ASSETS/Untitled.png)
 
-And click on the icon of your OS to download the installer.
-
-![](doc_ASSETS/Untitled%201.png)
-
-Click through the installer. This should install the Vienna executables to `/usr/local/bin`. Check by navigating there and trying to run `RNAfold`.
+Click on the icon of your OS to download the installer, and click through the installer. This should install the Vienna executables to `/usr/local/bin`. Check by navigating there and trying to run `RNAfold -h`.
 
 Then set in the arnie file:
 
@@ -87,11 +79,10 @@ gunzip ViennaRNA-2.4.14.tar.gz
 tar -xvf ViennaRNA-2.4.14.tar
 cd ViennaRNA-2.4.14
 ./configure --prefix /path/to/vienna/bin # make this where you want the executables to be installed
-
 make install
 ```
 
-I get errors about not being able to find `EXTERN.H` from perl wrapper parts, but for me the executable builds still work.
+I get errors about not being able to find `EXTERN.H` from perl wrappers, but the executable builds still work.
 
 Check the build by navigating to `/path/to/vienna/bin` and running `RNAfold -h`.
 
@@ -122,18 +113,15 @@ Then set in arnie file:
 nupack: /path/to/nupack3.0.6/src/bin
 ```
 
-## CONTRAfold 2 (`package='contrafold`)
+## CONTRAfold 2 (`package='contrafold'`)
 
-I recommend downloading the code that is at [https://github.com/csfoo/contrafold-se](https://github.com/csfoo/contrafold-se).  Even though this is named CONTRAfold-SE, the repo itself does not contain any of the parameter files from the CONTRAfold-SE project, and the authors cleaned up some build issues.  If you run this code with its default parameters, you are running CONTRAfold 2.
-
-On a Mac and Linux, this works for me:
+I recommend downloading the code that is at [https://github.com/csfoo/contrafold-se](https://github.com/csfoo/contrafold-se).  Even though this is named CONTRAfold-SE, the repo itself does not contain any of the parameter files from the CONTRAfold-SE project, and the authors cleaned up some build issues. If you run this code with its default parameters, you are running CONTRAfold 2.
 
 ```
 git clone https://github.com/csfoo/contrafold-se.git
 cd contrafold-se/src
 make
 ```
-
 To check the build, try running `./contrafold`.
 
 Then set in arnie.rc:
@@ -168,7 +156,7 @@ Download RNAstructure (pre-compiled command-line interface) for your OS from [ht
 
 Unzip the tarball and test the executables in `RNAstructure/exe` by running `./partition -h`.
 
-arnie.rc:
+Add to Arnie file:
 
 ```
 # RNAstructure (precompiled command line src)
@@ -192,7 +180,7 @@ make depend
 make
 ```
 
-To check build, try `./simfold -h`. Then put in arnie.rc:
+To check build, try `./simfold -h`. Then put in arnie file:
 
 ```
 #RNASoft build
@@ -221,7 +209,7 @@ cd LinearPartition
 make
 ```
 
-add to arnie.rc:
+add to arnie file:
 
 ```
 # LinearFold build
@@ -233,7 +221,7 @@ linearpartition: /path/to/LinearPartition/bin
 
 ## the TMP dir
 
-Last but not least, you'll need to create a directory somewhere where your system calls to all of these packages will be deleting temporary files and then deleting them. Add to arnie.rc:
+Last but not least, you'll need to create a directory somewhere where your system calls to all of these packages will be deleting temporary files and then deleting them. Add to arnie file:
 
 ```
 #directory to write temp files
