@@ -12,11 +12,11 @@ You don't have to install all of the packages described here for arnie to work. 
 
 - Benchmarking packages / skeptic of all?  Set up all of them!
 
-This document contains instructions to download, compile where needed, and set paths for the following packages:
+This document contains instructions to download, compile where needed, and set paths for all the major packages and versions that Arnie supports. This document does not describe the python syntax -- for that, go to `notebooks/start_here.ipynb`.
+
+At the end of the day you'll have an example arnie file that looks like this:
 
 ```
-# Example arnie.rc file:
-
 # Vienna RNAfold 2 Mac using installer:
 vienna_2: /usr/local/bin
 
