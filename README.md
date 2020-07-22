@@ -37,19 +37,19 @@ Hannah Wayment-Steele
 
 ## Setup:
 
-Start by creating a file that includes paths to your builds of all the structure prediction packages you wish to use.
+1. To use Arnie, you will create a file that contains the paths to the software packages that Arnie is wrapping. See `docs/setup.md` for installation instructions and troubleshooting tips, as well as instructions for setting up the arnie file.
 
-*Quickstart*: An example file is provided in `example_arnie_file.txt`.
+Quickstart: an example file is provided in `example_arnie_file.txt`.
 
-*Full details*: See docs/setup.md.
 
-Create a variable in your .bashrc:
+2. Create a variable in your .bashrc:
 
 ```
 export ARNIEFILE="/path/to/arnie/<my_file.txt>"
 ```
 
 ## Usage:
+
 See `examples/start_here.ipynb` for example syntax. In brief, comparing across packages is simple. For computing base pairing probability matrices:
 
 ```
@@ -67,10 +67,6 @@ Can also analyze as average base pairing per nucleotide:
 ![](assets/example_avg_bp_per_nucleotide.png)
 
 
-## Coming soon
-
-Pointers for compiling packages
-
 ## References
 
 1. Lorenz, R. et al. ViennaRNA Package 2.0. Algorithms Mol Biol 6, 26 (2011).
@@ -78,3 +74,4 @@ Pointers for compiling packages
 3. Reuter, J.S. & Mathews, D.H. RNAstructure: software for RNA secondary structure prediction and analysis. BMC Bioinformatics 11, 129 (2010).
 4. Andronescu, M., Condon, A., Hoos, H.H., Mathews, D.H. & Murphy, K.P. in RNA, Vol. 16 2304-2318 (2010).
 5. Do, C.B., Woods, D.A. & Batzoglou, S. CONTRAfold: RNA secondary structure prediction without physics-based models. Bioinformatics 22, e90-98 (2006).
+6. Wayment-Steele, H.K., Kladwang, W., Eterna Participants, R. Das, Biorxiv (2020).
