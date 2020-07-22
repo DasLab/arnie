@@ -3,15 +3,17 @@ Python API to compute RNA energetics and do structure prediction across multiple
 
 Currently supported:
 
-Vienna \[1\] [https://www.tbi.univie.ac.at/RNA/#download]
+- Vienna \[1\] [https://www.tbi.univie.ac.at/RNA/#download]
 
-NUPACK \[2\] [http://www.nupack.org/downloads]
+- NUPACK \[2\] [http://www.nupack.org/downloads]
 
-RNAstructure \[3\] [https://rna.urmc.rochester.edu/RNAstructure.html]
+- RNAstructure \[3\] [https://rna.urmc.rochester.edu/RNAstructure.html]
 
-RNAsoft \[4\] [http://www.rnasoft.ca/download.html]
+- RNAsoft \[4\] [http://www.rnasoft.ca/download.html]
 
-CONTRAfold \[5\] [http://contra.stanford.edu/contrafold/]
+- CONTRAfold \[5\] [http://contra.stanford.edu/contrafold/]
+
+- EternaFold \[6\] [http://https://eternagame.org/about/software]
 
 (c) 2020 Leland Stanford Jr University
 
@@ -33,15 +35,21 @@ Hannah Wayment-Steele
 
 `RNAGraph`: DEPRECATED, see https://github.com/DasLab/RiboGraphViz/ for current version of the code. Code to process and visualize secondary structures as graph objects.
 
-## Usage:
+## Setup:
 
-Start by creating a file that points to your builds of all the structure prediction packages you wish to use.  An example file is provided in `example_arnie_file.txt`.  Create a variable in your .bashrc for this:
+Start by creating a file that includes paths to your builds of all the structure prediction packages you wish to use.
+
+*Quickstart*: An example file is provided in `example_arnie_file.txt`.
+
+*Full details*: See docs/setup.md.
+
+Create a variable in your .bashrc:
 
 ```
 export ARNIEFILE="/path/to/arnie/<my_file.txt>"
 ```
-NB: this file is technically yaml format, but isn't read in by yaml.
 
+## Usage:
 See `examples/start_here.ipynb` for example syntax. In brief, comparing across packages is simple. For computing base pairing probability matrices:
 
 ```
