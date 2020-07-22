@@ -1,6 +1,6 @@
 # Getting set up with Arnie
 
-Arnie is a set of wrappers to call other packages. So in order for Arnie to work right, we have to do a little bit of lifting at the start to 1) download and compile those packages, and 2) tell Arnie where they are in our arnie.rc file.
+Arnie is a set of wrappers to call other packages. So in order for Arnie to work right, we have to do a little bit of lifting at the start to 1) download and compile those packages, and 2) tell Arnie where they are in your arnie file.
 
 Below is a set of notes with instructions / tips for installing packages on Mac and Linux. There are many more ways to do this! This is just what I (HKWS) have found to work and have recently tested.
 
