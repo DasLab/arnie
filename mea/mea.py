@@ -128,9 +128,9 @@ class MEA:
 
         a,b = np.triu_indices(self.N)
         cFP = 1e-6
-        for i in range(len(pred_m)):
-            if np.sum(self.MEA_bp_matrix,axis=0)[a[i]] + np.sum(self.MEA_bp_matrix,axis=0)[b[i]]==0:
-               cFP += np.multiply(pred_m[i], 1-probs[i])
+        # for i in range(len(pred_m)):
+        #     if np.sum(self.MEA_bp_matrix,axis=0)[a[i]] + np.sum(self.MEA_bp_matrix,axis=0)[b[i]]==0:
+        #        cFP += np.multiply(pred_m[i], 1-probs[i])
 
         sen = TP/(TP + FN)
         ppv = TP/(TP + FP - cFP)

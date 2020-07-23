@@ -487,20 +487,22 @@ def write(lines, fname=None):
       f.write('%s\n' % line)
   return fname
 
-def print_available_packages():
+def print_path_files():
   package_dct = load_package_locations()
   for key,v in package_dct.items():
-    if key != "TMP":
-      print(key,v)
+    print(key,v)
 
 def package_list():
   pkg_list=[]
   package_dct = load_package_locations()
   for key,v in package_dct.items():
-    if key != "TMP":
+    if key != "TMP" and key.lower() != 'bprna':
       if not key.startswith('linear'):
-        if v != "None":
-          pkg_list.append(key)
+        if key == 'eternafoldparams':
+          pkg_list.append('eternafold')
+        else:
+          if v != "None":
+            pkg_list.append(key)
   return pkg_list
 
 def load_package_locations():
