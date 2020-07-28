@@ -120,6 +120,13 @@ git clone https://github.com/csfoo/contrafold-se.git
 cd contrafold-se/src
 make
 ```
+
+If you get the following error:
+```
+Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
+```
+Try adding `#include <unistd.h>` to `Utilities.hpp`.
+
 To check the build, try running `./contrafold`.
 
 Then set in arnie.rc:
