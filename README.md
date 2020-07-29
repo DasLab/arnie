@@ -37,7 +37,7 @@ Hannah Wayment-Steele
 
 ## Setup:
 
-1. To use Arnie, you will create a file that contains the paths to the software packages that Arnie is wrapping. See `docs/setup_doc.md` for installation instructions and troubleshooting tips, as well as instructions for setting up the arnie file.
+1. To use Arnie, you will create a file that contains the paths to the software packages that Arnie is wrapping. See [`docs/setup_doc.md`](docs/setup_doc.md) for installation instructions and troubleshooting tips, as well as instructions for setting up the arnie file.
 
 Quickstart: an example file is provided in `example_arnie_file.txt`.
 
