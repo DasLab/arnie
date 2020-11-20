@@ -167,7 +167,7 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
         raise ValueError('Cannot run RNAstructure with non-default version: %s' % version)
     if (shape_signal is not None) and (shape_file is not None):
         raise ValueError('Please specify SHAPE reactivities either as a list or in a SHAPE reactivity file')
-    if (dms_signal is not None) and (dms_signal is not None):
+    if (dms_signal is not None) and (dms_file is not None):
         raise ValueError('Please specify DMS reactivities either as a list or in a DMS reactivity file')
 
     LOC=package_locs['rnastructure']
