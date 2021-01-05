@@ -11,7 +11,7 @@ DEBUG=False
 package_locs = load_package_locations()
 
 def free_energy(seq, constraint=None, package='vienna_2', T=37, coaxial=True,
-		 pseudo=False, dangles=True, reweight=None, ensemble=True, param_file=None):
+		 pseudo=False, dangles=True, reweight=None, ensemble=True, param_file=None, linear=False):
 	''' Compute free energy of RNA sequence. If structure is given, computes free energy of that structure. 
 			Otherwise, returns MFE structure of sequence [NOT IMPLEMENTED YET].
 
@@ -43,7 +43,7 @@ def free_energy(seq, constraint=None, package='vienna_2', T=37, coaxial=True,
 		structure = structure.replace('.','x')
 
 	return pfunc(seq, package=package, T=T, dangles=dangles, coaxial=coaxial, pseudo=pseudo,
-	 constraint=constraint, reweight=reweight, param_file=param_file, return_free_energy=True)
+	 constraint=constraint, reweight=reweight, param_file=param_file, return_free_energy=True, linear=linear)
 
 	# if package.lower().startswith('contrafold'):
 	# 	Z_constrained = pfunc(seq, package=package, T=T, dangles=dangles, constraint=constraint,param_file=param_file)
