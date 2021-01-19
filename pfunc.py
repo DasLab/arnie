@@ -4,16 +4,15 @@ import random, string
 import numpy as np
 from .utils import *
 
-#DEBUG=False
 
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
 
 def pfunc(seq, package='vienna_2', T=37,
     constraint=None, motif=None, linear=False,
-    dangles=True, noncanonical=False, pseudo=False, DIRLOC=None,
+    dangles=True, noncanonical=False, pseudoknots=False, DIRLOC=None,
     bpps=False, param_file=None, coaxial=True, reweight=None,
-    return_free_energy = False, beam_size=100, DEBUG=False):
+    return_free_energy = False, beam_size=100, DEBUG=False, probing_signal=None, probing_kws = None):
     ''' Compute partition function for RNA sequence.
 
         Args:
@@ -48,10 +47,15 @@ def pfunc(seq, package='vienna_2', T=37,
         if linear and pkg not in ['vienna','contrafold','eternafold']:
             print('Warning: LinearPartition only implemented for vienna, contrafold, eternafold.')
 
-    if pkg=='eternafold' and package_locs['eternafoldparams'] is None:
-        raise RuntimeError('Error: need to set path to EternaFold params to use eternafold hotkey.')
+    if pkg=='eternafold':
+        if package_locs['eternafoldparams'] is None:
+            raise RuntimeError('Error: need to set path to EternaFold params to use eternafold hotkey.')
+        else:
+            if probing_signal is not None:
+                if package_locs['eternafoldparams_PLUS_POTENTIALS'] is None:
+                    raise RuntimeError('Error: need to set path to EternaFold params plus potentials to use EternaFold probing-based prediction.')
 
-    if pseudo and pkg !='nupack':
+    if pseudoknots and pkg !='nupack':
         raise ValueError('pseudo only for use with nupack')
 
     if pkg=='vienna':
@@ -61,7 +65,7 @@ def pfunc(seq, package='vienna_2', T=37,
         else:
             Z, tmp_file = pfunc_vienna_(seq, version=version, T=T, dangles=dangles,
              constraint=constraint, motif=motif, bpps=bpps, param_file=param_file,
-             reweight=reweight, return_free_energy=return_free_energy, DEBUG=DEBUG)
+             reweight=reweight, return_free_energy=return_free_energy, DEBUG=DEBUG, probing_signal=probing_signal, probing_kws = probing_kws,)
      
     elif pkg=='contrafold':
         if linear:
@@ -84,7 +88,7 @@ def pfunc(seq, package='vienna_2', T=37,
          bpps=bpps,return_free_energy=return_free_energy, DEBUG=DEBUG)
 
     elif pkg=='nupack':
-        Z, tmp_file = pfunc_nupack_(seq, version=version, dangles=dangles, T=T, pseudo=pseudo,
+        Z, tmp_file = pfunc_nupack_(seq, version=version, dangles=dangles, T=T, pseudoknots=pseudoknots,
             return_free_energy=return_free_energy, DEBUG=DEBUG)
 
     elif pkg=='vfold':
@@ -92,10 +96,11 @@ def pfunc(seq, package='vienna_2', T=37,
 
     elif pkg=='eternafold':
         if linear:
-            Z, tmp_file = pfunc_linearpartition_(seq, package='eternafold', bpps=bpps, beam_size=beam_size, DEBUG=DEBUG)
+            Z, tmp_file = pfunc_linearpartition_(seq, package='eternafold', DIRLOC=DIRLOC, bpps=bpps, beam_size=beam_size, DEBUG=DEBUG)
         else:
-            Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, constraint=constraint, 
-                bpps=bpps, param_file=package_locs['eternafoldparams'], DIRLOC=DIRLOC, return_free_energy=return_free_energy, DEBUG=DEBUG)
+            Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, constraint=constraint, probing_kws=probing_kws,
+                bpps=bpps, param_file=package_locs['eternafoldparams'], DIRLOC=DIRLOC, return_free_energy=return_free_energy, DEBUG=DEBUG,
+                probing_signal = probing_signal)
 
     else:
         raise ValueError('package %s not understood.' % package)
@@ -110,7 +115,7 @@ def pfunc(seq, package='vienna_2', T=37,
         return Z
 
 def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=None,
-                dangles=True, bpps=False, reweight=None, return_free_energy=False, DEBUG=False):
+                dangles=True, bpps=False, reweight=None, return_free_energy=False, DEBUG=False, probing_signal=None, shapeMethod='W', probing_kws=None):
     """get partition function structure representation and Z
 
     Args:
@@ -132,8 +137,15 @@ def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_fil
     else:
         raise RuntimeError('Error, vienna version %s not present' % version)
 
-
     command = ['%s/RNAfold' % LOC, '-T', str(T), '-p']
+
+    if probing_signal is not None:
+        if probing_kws is None:
+            probing_kws={}
+        probing_file = run_RNAPVmin(probing_signal, seq, LOC, DEBUG, **probing_kws)
+        command.append('--shape=%s' % probing_file)
+        command.append('--shapeMethod=%s' % shapeMethod)
+
 
     if version.startswith('2'):
         output_id = local_rand_filename()
@@ -198,7 +210,7 @@ def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_fil
         return np.exp(-1*free_energy/(.0019899*(273+T))), output_dot_ps_file
 
 def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False,
-         param_file=None, return_free_energy=False, DIRLOC=None, DEBUG=False):
+         param_file=None, return_free_energy=False, DIRLOC=None, DEBUG=False, probing_signal=None, probing_kws=None):
 
     """get partition function structure representation and free energy
 
@@ -215,11 +227,14 @@ def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False,
     """
     if not version: version='2'
 
-    fname = '%s.in' % filename()
+    if probing_signal is not None:
+        fname = write_reactivity_file_contrafold(probing_signal, seq)
+    else:
+        fname = '%s.in' % filename()
 
     if DIRLOC is not None:
         LOC=DIRLOC
-    if version.startswith('2'):
+    elif version.startswith('2'):
         LOC=package_locs['contrafold_2']
     elif version.startswith('1'):
         LOC=package_locs['contrafold_1']
@@ -228,20 +243,28 @@ def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False,
 
     command = ['%s/contrafold' % LOC, 'predict', fname]
 
+    if probing_signal is not None:
+        command = command + ['--evidence', '--params', package_locs['eternafoldparams_PLUS_POTENTIALS'], '--numdatasources','1', ]
+        if probing_kws is not None:
+            if 'kappa' in probing_kws.keys():
+                command = command + ['--kappa', str(probing_kws['kappa']) ]
+    else:
+        if param_file is not None:
+            command = command + ['--params', param_file]
+
     if bpps:
         posterior_fname = '%s.posteriors' % filename()
-        command = command + ['--posteriors', '0.001', posterior_fname]
+        command = command + ['--posteriors', '0.00001', posterior_fname]
     else:
         command.append('--partition')
 
-    if param_file is not None:
-        command = command + ['--params', param_file]
 
     if constraint is not None:
         convert_dbn_to_contrafold_input(seq, constraint, fname)
         command.append('--constraints')
     else:
-        convert_dbn_to_contrafold_input(seq, ''.join(['.' for x in range(len(seq))]), fname)
+        if probing_signal is None:
+            convert_dbn_to_contrafold_input(seq, ''.join(['.' for x in range(len(seq))]), fname)
 
     if DEBUG: print(' '.join(command))
     p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
@@ -314,7 +337,7 @@ def pfunc_rnasoft_(seq, version='99', T=37, constraint=None, bpps=False, return_
     else:
         return Z, bpps_fname
 
-def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=False, pseudo=False, DEBUG=False):
+def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=False, pseudoknots=False, DEBUG=False):
 
     if not version: version='95'
     nupack_materials={'95': 'rna1995', '99': 'rna1999', 'dna':'dna1998'}
@@ -331,7 +354,7 @@ def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=Fals
     command=['%s/pfunc' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T),
      '-material', nupack_materials[version], '-dangles', dangle_option]
 
-    if pseudo:
+    if pseudoknots:
         command.append('--pseudo')
     if DEBUG: print(' '.join(command))
     p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
