@@ -9,9 +9,9 @@ DEBUG=False
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
 
-def sample_structures(seq, n_samples = 10, package='vienna_2', T=37, constraint=None, 
+def sample_structures(seq, n_samples = 10, package='vienna_2', T=37, constraint=None, param_file=None,
 	dangles=True, reweight=None, nonredundant=False):
-    ''' Draw stochastic sampled structures for RNA sequence. Possible packages: 'vienna_1', 'vienna_2'
+    ''' Draw stochastic sampled structures for RNA sequence. Possible packages: 'eternafold', 'vienna_2'
 
         Args:
         seq (str): nucleic acid sequence
@@ -39,6 +39,9 @@ def sample_structures(seq, n_samples = 10, package='vienna_2', T=37, constraint=
         struct_list = sample_vienna_(seq, n_samples=n_samples, version=version, T=T, 
         	dangles=dangles, constraint=constraint, reweight=reweight, nonredundant = nonredundant)
 
+    elif pkg=='eternafold':
+        struct_list = sample_eternafold_(seq, n_samples=n_samples, param_file=param_file, constraint=constraint, nonredundant = nonredundant)
+
     else:
         raise ValueError('package %s either not understood or not supported at this moment.' % package)
 
@@ -46,15 +49,16 @@ def sample_structures(seq, n_samples = 10, package='vienna_2', T=37, constraint=
 
 def sample_vienna_(seq, n_samples=10, T=37, version='2', constraint=None, 
 	dangles=True, reweight=None, nonredundant=False):
-    """get partition function structure representation and Z
+    """Stochastically sample structures from Vienna RNAsubopt.
 
-    Args:
+    Inputs:
         seq (str): nucleic acid sequence
+        n_samples (int): number of structures to sample.
         T (float): temperature
         constraint (str): structure constraints
         motif (str): argument to vienna motif  
-    Returns
-        str, float: secondary structure representation and Z
+    Outputs:
+        struct_list (list): list of stochastically-sampled structures.
     """
 
     if not version:
@@ -108,8 +112,57 @@ def sample_vienna_(seq, n_samples=10, T=37, version='2', constraint=None,
         struct_list, prob_list, energy_list = [],[],[]
         output_lines = stdout.decode('utf-8').split('\n')[1:-1] # first line is just repeating sequence, last is empty space
         for line in output_lines:
-            struct_list.append(line.split(' ')[0].replace('.','x')) #explicitly converting .'s to x's here to maintain x=unpaired, .=unconstrained
+            struct_list.append(line.split(' ')[0])
             # prob_list.append(float(line.split(' ')[-2]))
             # energy_list.append(float(line.split(' ')[-1]))
 
     return struct_list
+
+def sample_eternafold_(seq, n_samples=10, param_file=None, constraint=None, nonredundant=False):
+    """Stochastically sample structures from Vienna RNAsubopt.
+
+    Inputs:
+        seq (str): nucleic acid sequence
+        n_samples (int): number of structures to sample.
+        T (float): temperature
+        constraint (str): structure constraints
+        motif (str): argument to vienna motif  
+    Outputs:
+        struct_list (list): list of stochastically-sampled structures.
+    """
+
+    fname = '%s.in' % filename()
+    LOC=package_locs['eternafold']
+
+
+    command = ['%s/contrafold' % LOC, 'sample', fname]
+
+    if param_file is not None:
+        command = command + ['--params', param_file]
+    else:
+        command = command + ['--params', package_locs['eternafoldparams']]
+
+    if constraint is not None:
+        convert_dbn_to_contrafold_input(seq, constraint, fname)
+        command.append('--constraints')
+    else:
+        convert_dbn_to_contrafold_input(seq, ''.join(['.' for x in range(len(seq))]), fname)
+
+    if DEBUG: print(' '.join(command))
+
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+
+    stdout, stderr = p.communicate()
+
+    struct_list = stdout.decode('utf-8').split('\n')[:-1]
+    print(struct_list)
+
+    if DEBUG:
+        print('stdout')
+        print(stdout)
+        print('stderr')
+        print(stderr)
+    if p.returncode:
+        raise Exception('Eternafold sample failed: on %s\n%s' % (seq, stderr))
+
+    os.remove(fname)
