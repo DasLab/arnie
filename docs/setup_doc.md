@@ -6,9 +6,9 @@ Below is a set of notes with instructions / tips for installing packages on Mac 
 
 You don't have to install all of the packages described here for arnie to work. At a minimum, setting up Vienna is required. Beyond that, your needs will dictate what other packages you set up.
 
-- Desire more accurate thermodynamic predictions? Set up EternaFold
+- More accurate thermodynamic predictions? Set up EternaFold
 
-- Running RNAStructure + SHAPE? Set up RNAstructure (Thanks to Ramya Rangan!)
+- SHAPE-directed structure prediction? Set up Vienna or RNAstructure
 
 - Benchmarking packages / skeptic of all?  Set up all of them!
 
@@ -32,6 +32,10 @@ rnasoft: /path/to/MultiRNAFold
 # RNAstructure (precompiled command line src)
 rnastructure: /path/to/RNAstructure/exe
 
+# Path to EternaFold
+eternafold: /path/to/EternaFold/src
+
+# (DEPRECATED, better to put path to Eternafold)
 # Path to EternaFold parameters
 eternafoldparams: /path/to/EternaFold/parameters/EternaFoldParams.v1
 
@@ -91,6 +95,27 @@ Then set in the arnie file:
 vienna_2: /path/to/ViennaRNA-2.4.14/src/bin
 ```
 
+## EternaFold (`package='eternafold'`)
+
+Go to [https://eternagame.org/about/software](https://eternagame.org/about/software). Follow the instructions under "Request License" under EternaFold to download.
+
+![](doc_ASSETS/Untitled%203.png)
+
+If you get the following error:
+```
+Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
+```
+Try adding `#include <unistd.h>` to `Utilities.hpp`.
+
+To check the build, try running `./contrafold`.
+
+Set in your arnie file:
+
+```
+#Path to EternaFold
+eternafold: /path/to/EternaFold/src
+```
+
 ## NUPACK (`package='nupack'`)
 
 Download from [http://www.nupack.org/downloads](http://www.nupack.org/downloads). (Requires registering to sign a license agreement).
@@ -134,23 +159,6 @@ Then set in arnie.rc:
 ```
 # CONTRAfold build
 contrafold_2: /path/to/contrafold-se/src
-```
-
-## EternaFold (`package='eternafold'`)
-
-If you haven't already, will need to set up CONTRAfold 2 (see above).
-
-Go to [https://eternagame.org/about/software](https://eternagame.org/about/software). Follow the instructions under "Request License" under EternaFold to download.
-
-![](doc_ASSETS/Untitled%203.png)
-
-You don't need to compile anything here to use the parameters. 
-
-Set in your arnie file:
-
-```
-#Path to EternaFold parameters
-eternafoldparams: /path/to/EternaFold/parameters/EternaFoldParams.v1
 ```
 
 ## RNAStructure (`package='rnastructure'`)
