@@ -56,7 +56,8 @@ def pfunc(seq, package='vienna_2', T=37,
 
     if pkg=='vienna':
         if linear:
-            Z, tmp_file = pfunc_linearpartition_(seq, package='vienna',bpps=bpps, beam_size=beam_size, DEBUG=DEBUG)
+            Z, tmp_file = pfunc_linearpartition_(seq, package='vienna',bpps=bpps, beam_size=beam_size,
+                return_free_energy=return_free_energy, DEBUG=DEBUG)
 
         else:
             Z, tmp_file = pfunc_vienna_(seq, version=version, T=T, dangles=dangles,
@@ -65,7 +66,8 @@ def pfunc(seq, package='vienna_2', T=37,
      
     elif pkg=='contrafold':
         if linear:
-            Z, tmp_file = pfunc_linearpartition_(seq, package='contrafold', bpps=bpps, beam_size=beam_size, DEBUG=DEBUG)
+            Z, tmp_file = pfunc_linearpartition_(seq, package='contrafold', bpps=bpps, beam_size=beam_size,
+                return_free_energy=return_free_energy, DEBUG=DEBUG)
         else:
             Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, 
                 constraint=constraint, bpps=bpps, param_file=param_file, DIRLOC=DIRLOC,
@@ -92,7 +94,8 @@ def pfunc(seq, package='vienna_2', T=37,
 
     elif pkg=='eternafold':
         if linear:
-            Z, tmp_file = pfunc_linearpartition_(seq, package='eternafold', bpps=bpps, beam_size=beam_size, DEBUG=DEBUG)
+            Z, tmp_file = pfunc_linearpartition_(seq, package='eternafold', bpps=bpps, beam_size=beam_size,
+                return_free_energy=return_free_energy, DEBUG=DEBUG)
         else:
             Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, constraint=constraint, 
                 bpps=bpps, param_file=package_locs['eternafoldparams'], DIRLOC=DIRLOC, return_free_energy=return_free_energy, DEBUG=DEBUG)
@@ -477,7 +480,7 @@ def pfunc_vfold_(seq, version='0', T=37, coaxial=True, bpps=False, DEBUG=False):
     #output: take second field of last line for Z 
 
 
-def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100, DEBUG=False):
+def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100, return_free_energy=False, DEBUG=False):
     LOC = package_locs['linearpartition']
     tmp_file = filename()
     tmp_command = filename()
@@ -522,10 +525,16 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
 
         if package in ['contrafold','eternafold']:
             logZ=float(stdout.decode('utf-8').split(' ')[-1])
-            return np.exp(logZ), None
+            if return_free_energy:
+                return -1*logZ, None
+            else:
+                return np.exp(logZ), None
 
         elif package=='vienna':
             free_energy = float(stdout.decode('utf-8').split(' ')[-2])
             T=37
-            return np.exp(-1*free_energy/(.0019899*(273+T))), None
+            if return_free_energy:
+                return free_energy, None
+            else:
+                return np.exp(-1*free_energy/(.0019899*(273+T))), None
 
