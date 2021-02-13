@@ -11,7 +11,7 @@ package_locs = load_package_locations()
 
 def mfe(seq, package='vienna_2', T=37,
     constraint=None, motif=None,
-    linear=False,
+    linear=False, return_dG_MFE = False,
     dangles=True, noncanonical=False,
     bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False,
     shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False):
@@ -26,6 +26,7 @@ def mfe(seq, package='vienna_2', T=37,
         constraint (str): structure constraints
         linear (bool): call LinearFold to estimate MFE in Vienna or Contrafold
         motif (str): argument to vienna motif 
+        return_dG_MFE (bool): also return dG(MFE) (specific to linearfold)
         dangles (bool): dangles or not, specifiable for vienna, nupack
         coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
         noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
@@ -56,19 +57,29 @@ def mfe(seq, package='vienna_2', T=37,
 
     if pkg=='vienna':
         if linear:
-            struct = mfe_linearfold_(seq, package='vienna')
+            if return_dG_MFE:
+                struct, dG_MFE = mfe_linearfold_(seq, package='vienna', return_dG_MFE=return_dG_MFE)
+            else:
+                struct = mfe_linearfold_(seq, package='vienna', return_dG_MFE=return_dG_MFE)
         else:
             struct = mfe_vienna_(seq, version=version, T=T, dangles=dangles, constraint=constraint, motif=motif, param_file=param_file,reweight=reweight)
  
     elif pkg=='contrafold':
         if linear:
-            struct = mfe_linearfold_(seq, package='contrafold')
+            if return_dG_MFE:
+                struct, dG_MFE = mfe_linearfold_(seq, package='contrafold', return_dG_MFE=return_dG_MFE)
+            else:
+                struct = mfe_linearfold_(seq, package='contrafold', return_dG_MFE=return_dG_MFE)
         else:
             struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=param_file,viterbi=viterbi)
 
     elif pkg=='eternafold':
         if linear:
-            struct = mfe_linearfold_(seq, package='eternafold')
+            if return_dG_MFE:
+                struct, dG_MFE = mfe_linearfold_(seq, package='eternafold', return_dG_MFE=return_dG_MFE)
+            else:
+                struct = mfe_linearfold_(seq, package='eternafold', return_dG_MFE=return_dG_MFE)
+
         else:
             struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=package_locs['eternafoldparams'],viterbi=viterbi)
 
@@ -82,7 +93,10 @@ def mfe(seq, package='vienna_2', T=37,
     else:
         raise ValueError('package %s not understood.' % package)
 
-    return struct
+    if return_dG_MFE:
+        return struct, dG_MFE
+    else:
+        return struct
 
 def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=None, dangles=True, reweight=None):
     """get minimum free energy structure with Vienna
@@ -317,7 +331,7 @@ def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,vit
     
     return stdout.decode('utf-8').split('\n')[-2]
 
-def mfe_linearfold_(seq, bpps=False, package='contrafold', beam_size=100):
+def mfe_linearfold_(seq, bpps=False, package='contrafold', beam_size=100, return_dG_MFE=False):
     
     seqfile = write([seq])
 
@@ -348,8 +362,18 @@ def mfe_linearfold_(seq, bpps=False, package='contrafold', beam_size=100):
 
 
     # linearfold returns two different things depending on which package
+    struct = stdout.decode('utf-8').split('\n')[1].split(' ')[0]
 
-    return stdout.decode('utf-8').split('\n')[1].split(' ')[0]
+    if return_dG_MFE:
 
+        dG_mfe = float(stdout.decode('utf-8').split('\n')[1].split(' ')[1][1:-1])
+
+        if package.lower() != 'vienna':
+            dG_mfe *= -1
+
+        return struct, dG_mfe
+
+    else:
+        return struct
 
 
