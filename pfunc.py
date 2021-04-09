@@ -87,7 +87,7 @@ def pfunc(seq, package='vienna_2', T=37,
          bpps=bpps,return_free_energy=return_free_energy, DEBUG=DEBUG)
 
     elif pkg=='nupack':
-        Z, tmp_file = pfunc_nupack_(seq, version=version, dangles=dangles, T=T, pseudo=pseudo, dna=dna,
+        Z, tmp_file = pfunc_nupack_(seq, version=version, dangles=dangles, T=T, pseudo=pseudo, dna=dna, constraint=constraint,
             return_free_energy=return_free_energy, DEBUG=DEBUG)
 
     elif pkg=='vfold':
@@ -318,7 +318,7 @@ def pfunc_rnasoft_(seq, version='99', T=37, constraint=None, bpps=False, return_
     else:
         return Z, bpps_fname
 
-def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=False, pseudo=False, dna=False, DEBUG=False):
+def pfunc_nupack_(seq, version='95', T=37, dangles=True, constraint=None, return_free_energy=False, pseudo=False, dna=False, DEBUG=False):
 
     if not version: version='95'
     nupack_materials={'95': 'rna1995', '99': 'rna1999', 'dna':'dna1998'}
@@ -332,10 +332,17 @@ def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=Fals
     else:
         dangle_option='none'
 
-    seqfile = write([seq])
-
-    command=['%s/pfunc' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T),
-         '-material', nupack_materials[version], '-dangles', dangle_option]
+    if constraint is not None:
+        if '.' in constraint:
+            print('Warning: NUPACK does not do constrained folding . and x')
+        seqfile = write([seq, constraint])
+        command=['%s/energy' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T),
+             '-material', nupack_materials[version], '-dangles', dangle_option]
+       
+    else:
+        seqfile = write([seq])
+        command=['%s/pfunc' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T),
+             '-material', nupack_materials[version], '-dangles', dangle_option]
 
     if pseudo:
         command.append('--pseudo')
@@ -353,8 +360,13 @@ def pfunc_nupack_(seq, version='95', T=37, dangles=True, return_free_energy=Fals
     if p.returncode:
         raise Exception('Nupack pfunc failed: on %s\n%s' % (seq, stderr))
 
-    free_energy = float(stdout.decode('utf-8').split('\n')[-3])
-    Z=float(stdout.decode('utf-8').split('\n')[-2])
+    if constraint is not None:
+        free_energy = float(stdout.decode('utf-8').split('\n')[-2])
+        Z=np.exp(-1*free_energy/(.0019899*(273+T)))
+
+    else:
+        free_energy = float(stdout.decode('utf-8').split('\n')[-3])
+        Z=float(stdout.decode('utf-8').split('\n')[-2])
 
     os.remove(seqfile)
 
