@@ -10,7 +10,7 @@ DEBUG=False
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
 
-def free_energy(seq, constraint=None, package='vienna_2', T=37, coaxial=True,
+def free_energy(seq, constraint=None, package='vienna_2', T=37, coaxial=True, dna=False,
 		 pseudo=False, dangles=True, reweight=None, ensemble=True, param_file=None, linear=False):
 	''' Compute free energy of RNA sequence. If structure is given, computes free energy of that structure. 
 			Otherwise, returns MFE structure of sequence [NOT IMPLEMENTED YET].
@@ -28,6 +28,7 @@ def free_energy(seq, constraint=None, package='vienna_2', T=37, coaxial=True,
 
 		motif (str): argument to vienna motif 
 		dangles (bool): dangles or not, specifiable for vienna, nupack
+                dna (bool): use SantaLucia model for DNA (NUPACK only)
 		coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
 		noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
 		pseudo (bool): include pseudoknot (nupack only)
@@ -42,7 +43,7 @@ def free_energy(seq, constraint=None, package='vienna_2', T=37, coaxial=True,
 	if not ensemble:
 		structure = structure.replace('.','x')
 
-	return pfunc(seq, package=package, T=T, dangles=dangles, coaxial=coaxial, pseudo=pseudo,
+	return pfunc(seq, package=package, T=T, dangles=dangles, coaxial=coaxial, pseudo=pseudo, dna=dna,
 	 constraint=constraint, reweight=reweight, param_file=param_file, return_free_energy=True, linear=linear)
 
 	# if package.lower().startswith('contrafold'):
