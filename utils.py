@@ -138,8 +138,8 @@ def convert_dbn_to_RNAstructure_input(seq, constraints, filename):
     out.write('SS:\n')
     for x in SS_list:
       out.write('%d\n' % x)
+    out.write('-1\n')
     out.write('Mod:\n-1\n')
-    out.write('-1\nPairs:\n')
     out.write('Pairs:\n')
     for x,y in pairs_list:
       out.write('%d %d\n' % (x,y))
