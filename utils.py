@@ -134,13 +134,17 @@ def convert_dbn_to_RNAstructure_input(seq, constraints, filename):
       print('Error reading constraint string', c)
 
   with open('%s' % filename, 'w') as out:
+    out.write('DS:\n-1\n')
     out.write('SS:\n')
     for x in SS_list:
       out.write('%d\n' % x)
+    out.write('Mod:\n-1\n')
     out.write('-1\nPairs:\n')
+    out.write('Pairs:\n')
     for x,y in pairs_list:
       out.write('%d %d\n' % (x,y))
     out.write('-1 -1')
+    out.write('FMN:\n-1\nForbids:\n-1\n')
 
 def write_constraint_string(seq, constraint_dbn):
   '''write set of integers to represent constraints, i.e. for use in bpseq format.'''
