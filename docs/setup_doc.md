@@ -46,8 +46,28 @@ linearpartition: /path/to/LinearPartition/bin
 #directory to write temp files
 TMP: /path/to/TMP/dir
 ```
+## EternaFold (`package='eternafold'`)
 
-## Vienna RNAFold (Arnie default)
+Go to [https://eternagame.org/about/software](https://eternagame.org/about/software). Follow the instructions under "Request License" under EternaFold to download.
+
+![](doc_ASSETS/Untitled%203.png)
+
+If you get the following error:
+```
+Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
+```
+Try adding `#include <unistd.h>` to `Utilities.hpp`.
+
+To check the build, try running `./contrafold`.
+
+Set in your arnie file:
+
+```
+#Path to EternaFold
+eternafold: /path/to/EternaFold/src
+```
+
+## Vienna RNAFold
 
 ### Existing binaries:
 
@@ -91,27 +111,6 @@ Then set in the arnie file:
 ```
 # Vienna RNAfold 2 Linux build from source:
 vienna_2: /path/to/ViennaRNA-2.4.14/src/bin
-```
-
-## EternaFold (`package='eternafold'`)
-
-Go to [https://eternagame.org/about/software](https://eternagame.org/about/software). Follow the instructions under "Request License" under EternaFold to download.
-
-![](doc_ASSETS/Untitled%203.png)
-
-If you get the following error:
-```
-Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
-```
-Try adding `#include <unistd.h>` to `Utilities.hpp`.
-
-To check the build, try running `./contrafold`.
-
-Set in your arnie file:
-
-```
-#Path to EternaFold
-eternafold: /path/to/EternaFold/src
 ```
 
 ## NUPACK (`package='nupack'`)
