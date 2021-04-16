@@ -522,6 +522,7 @@ def load_package_locations():
                 return_dct[key] = string
 
     if 'eternafoldparams' not in return_dct.keys():
-      return_dct['eternafoldparams'] = "%s/../params/EternaFoldParams.v1" % return_dct['eternafold']
-      
+      if 'eternafold' in return_dct.keys():                                         
+        return_dct['eternafoldparams'] = "%s/../params/EternaFoldParams.v1" % return_dct['eternafold']
+
     return return_dct
