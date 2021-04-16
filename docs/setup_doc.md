@@ -1,10 +1,8 @@
-# Getting set up with Arnie
+# Setting up Arnie (Mac and Linux)
 
 Arnie is a set of wrappers to call other packages. So in order for Arnie to work right, we have to do a little bit of lifting at the start to 1) download and compile those packages, and 2) tell Arnie where they are in your arnie file.
 
-Below is a set of notes with instructions / tips for installing packages on Mac and Linux. There are many more ways to do this! This is just what I (HKWS) have found to work and have recently tested.
-
-You don't have to install all of the packages described here for arnie to work. At a minimum, setting up Vienna is required. Beyond that, your needs will dictate what other packages you set up.
+You don't have to install all of the packages described here for Arnie to work. Your needs will dictate what other packages you set up.
 
 - More accurate thermodynamic predictions? Set up EternaFold
 
@@ -48,8 +46,28 @@ linearpartition: /path/to/LinearPartition/bin
 #directory to write temp files
 TMP: /path/to/TMP/dir
 ```
+## EternaFold (`package='eternafold'`)
 
-## Vienna RNAFold (Arnie default)
+Go to [https://eternagame.org/about/software](https://eternagame.org/about/software). Follow the instructions under "Request License" under EternaFold to download.
+
+![](doc_ASSETS/Untitled%203.png)
+
+If you get the following error:
+```
+Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
+```
+Try adding `#include <unistd.h>` to `Utilities.hpp`.
+
+To check the build, try running `./contrafold`.
+
+Set in your arnie file:
+
+```
+#Path to EternaFold
+eternafold: /path/to/EternaFold/src
+```
+
+## Vienna RNAFold
 
 ### Existing binaries:
 
@@ -93,27 +111,6 @@ Then set in the arnie file:
 ```
 # Vienna RNAfold 2 Linux build from source:
 vienna_2: /path/to/ViennaRNA-2.4.14/src/bin
-```
-
-## EternaFold (`package='eternafold'`)
-
-Go to [https://eternagame.org/about/software](https://eternagame.org/about/software). Follow the instructions under "Request License" under EternaFold to download.
-
-![](doc_ASSETS/Untitled%203.png)
-
-If you get the following error:
-```
-Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
-```
-Try adding `#include <unistd.h>` to `Utilities.hpp`.
-
-To check the build, try running `./contrafold`.
-
-Set in your arnie file:
-
-```
-#Path to EternaFold
-eternafold: /path/to/EternaFold/src
 ```
 
 ## NUPACK (`package='nupack'`)
