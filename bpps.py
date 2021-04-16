@@ -146,7 +146,7 @@ def bpps_nupack_(sequence, version='95', T=37, dangles=True, pseudo=False):
     seqfile = write([sequence])
 
     command=['%s/pairs' % DIR, '%s' % seqfile.replace('.in',''),
-      '-T', str(T), '-material', nupack_materials[version], '-dangles', dangle_option]
+      '-T', str(T), '-material', nupack_materials[version], '-dangles', dangle_option, '-cutoff', '0.0000000001']
 
     if pseudo:
         command.append('--pseudo')
@@ -181,7 +181,7 @@ def bpps_rnastructure_(sequence, tmp_file, coaxial=True):
 
     pfsfile = tmp_file #'%s/rnastructtmp.pfs' % package_locs['TMP']
     outfile = '%s.probs' % (tmp_file.replace('.pfs',''))
-    command = ['%s/ProbabilityPlot' % DIR, pfsfile, outfile, '-t']
+    command = ['%s/ProbabilityPlot' % DIR, pfsfile, outfile, '-t', '-min', '0.0000000001']
 
     probs=np.zeros([len(sequence), len(sequence)])
 

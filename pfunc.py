@@ -137,7 +137,7 @@ def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_fil
         raise RuntimeError('Error, vienna version %s not present' % version)
 
 
-    command = ['%s/RNAfold' % LOC, '-T', str(T), '-p']
+    command = ['%s/RNAfold' % LOC, '-T', str(T), '-p', '−−bppmThreshold=1e-10']
 
     if version.startswith('2'):
         output_id = local_rand_filename()
@@ -234,7 +234,7 @@ def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False,
 
     if bpps:
         posterior_fname = '%s.posteriors' % filename()
-        command = command + ['--posteriors', '0.001', posterior_fname]
+        command = command + ['--posteriors', '0.0000000001', posterior_fname]
     else:
         command.append('--partition')
 
