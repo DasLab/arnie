@@ -137,9 +137,11 @@ def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_fil
         raise RuntimeError('Error, vienna version %s not present' % version)
 
 
-    command = ['%s/RNAfold' % LOC, '-p', '-T', str(T), '--bppmThreshold=0.0000000001' ]
+    command = ['%s/RNAfold' % LOC, '-p', '-T', str(T)]
 
     if version.startswith('2'):
+
+        command.append('--bppmThreshold=0.0000000001')
         output_id = local_rand_filename()
         output_dot_ps_file = "%s_0001_dp.ps" % output_id
         command.append('--id-prefix=%s' % output_id)
