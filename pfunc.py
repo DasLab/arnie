@@ -137,7 +137,7 @@ def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_fil
         raise RuntimeError('Error, vienna version %s not present' % version)
 
 
-    command = ['%s/RNAfold' % LOC, '-T', str(T), '-p', '−−bppmThreshold=1e-10']
+    command = ['%s/RNAfold' % LOC, '-p', '-T', str(T), '--bppmThreshold=0.0000000001' ]
 
     if version.startswith('2'):
         output_id = local_rand_filename()
