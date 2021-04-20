@@ -11,7 +11,7 @@ DEBUG=False
 package_locs = load_package_locations()
 
 def bpps(sequence, package='vienna', constraint=None, pseudo=False,
-         T=37, coaxial=True, linear=False,
+         T=37, coaxial=True, linear=False, dna=False,
         motif=None, dangles=True,param_file=None,reweight=None, beam_size=100):
     ''' Compute base pairing probability matrix for RNA sequence.
 
@@ -23,6 +23,7 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
     motif (str): argument to vienna motif
     pseudo (bool): (NUPACK only) include pseudoknot calculation
     dangles (bool): dangles or not, specifiable for vienna, nupack
+    dna (bool): (NUPACK only) use SantaLucia 1998 parameters for DNA
     coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
     noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
     beam size (int): Beam size for LinearPartition base pair calculation.
@@ -52,7 +53,7 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
         print('Warning: LinearPartition only implemented for vienna, contrafold, eternafold.')
 
     if pkg=='nupack':
-        return bpps_nupack_(sequence, version = version, dangles = dangles, T = T, pseudo=pseudo)
+        return bpps_nupack_(sequence, version = version, dangles = dangles, T = T, pseudo=pseudo, dna=dna)
     elif pkg=='vfold':
         return bpps_vfold_(sequence, version = version, T = T, coaxial = coaxial)
     else:
@@ -130,11 +131,16 @@ def bpps_rnasoft_(sequence, tmp_file):
 
     return probs
 
-def bpps_nupack_(sequence, version='95', T=37, dangles=True, pseudo=False):
+def bpps_nupack_(sequence, version='95', T=37, dangles=True, pseudo=False,dna=False):
 
     if not version: version='95'
     
     nupack_materials={'95': 'rna1995', '99': 'rna1999'}
+
+    if dna:
+        material='dna1998'
+    else:
+        material=nupack_materials[version]
 
     DIR = package_locs['nupack']
 
@@ -146,7 +152,7 @@ def bpps_nupack_(sequence, version='95', T=37, dangles=True, pseudo=False):
     seqfile = write([sequence])
 
     command=['%s/pairs' % DIR, '%s' % seqfile.replace('.in',''),
-      '-T', str(T), '-material', nupack_materials[version], '-dangles', dangle_option, '-cutoff', '0.0000000001']
+      '-T', str(T), '-material', material, '-dangles', dangle_option, '-cutoff', '0.0000000001']
 
     if pseudo:
         command.append('--pseudo')
