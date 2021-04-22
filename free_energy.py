@@ -41,7 +41,7 @@ def free_energy(seq, constraint=None, package='vienna_2', T=37, coaxial=True, dn
 		free energy (float)
 	'''
 	if not ensemble:
-		structure = structure.replace('.','x')
+		constraint = constraint.replace('.','x')
 
 	return pfunc(seq, package=package, T=T, dangles=dangles, coaxial=coaxial, pseudo=pseudo, dna=dna,
 	 constraint=constraint, reweight=reweight, param_file=param_file, return_free_energy=True, linear=linear, DEBUG=DEBUG)
