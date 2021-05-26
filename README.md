@@ -48,6 +48,12 @@ Quickstart: an example file is provided in `example_arnie_file.txt`.
 export ARNIEFILE="/path/to/arnie/<my_file.txt>"
 ```
 
+3. Add Arnie location to your python path in your .bashrc, i.e.
+
+```
+export PYTHONPATH=$PYTHONPATH:/path/to/arnie
+```
+
 ## Usage:
 
 See `examples/start_here.ipynb` for example syntax. In brief, comparing across packages is simple. For computing base pairing probability matrices:
