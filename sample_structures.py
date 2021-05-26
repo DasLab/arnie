@@ -119,7 +119,7 @@ def sample_vienna_(seq, n_samples=10, T=37, version='2', constraint=None,
     return struct_list
 
 def sample_eternafold_(seq, n_samples=10, param_file=None, constraint=None, nonredundant=False):
-    """Stochastically sample structures from Vienna RNAsubopt.
+    """Stochastically sample structures from EternaFold.
 
     Inputs:
         seq (str): nucleic acid sequence
@@ -155,7 +155,6 @@ def sample_eternafold_(seq, n_samples=10, param_file=None, constraint=None, nonr
     stdout, stderr = p.communicate()
 
     struct_list = stdout.decode('utf-8').split('\n')[:-1]
-    print(struct_list)
 
     if DEBUG:
         print('stdout')
@@ -166,3 +165,4 @@ def sample_eternafold_(seq, n_samples=10, param_file=None, constraint=None, nonr
         raise Exception('Eternafold sample failed: on %s\n%s' % (seq, stderr))
 
     os.remove(fname)
+    return struct_list
