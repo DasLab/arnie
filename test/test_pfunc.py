@@ -1,23 +1,22 @@
-import pfunc
-from utils import load_package_locations_from_yaml
-sample_seq = 'GGGGAAAACCCC'
+from arnie.pfunc import pfunc
+from arnie.utils import load_package_locations
 
-def test_pkg(package):
+sample_seq = 'CGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCG'
+
+def test_pfunc(package):
 	
-	Z = pfunc.pfunc(sample_seq, package=package, bpps=False)
+	Z = pfunc(sample_seq, package=package)
 	print('test %s' % package, Z)
 	return
 
-def test_pkg_w_bpps(package):
-	
-	Z, tmp_file = pfunc.pfunc(sample_seq, package=package, bpps=True)
-	print('test %s, tmp file for bpps %s' % (package, tmp_file), Z)
-	return
-
 if __name__=='__main__':
-	package_locs = load_package_locations_from_yaml('user_default.yaml')
+	package_locs = load_package_locations()
+	print(package_locs)
 	for pkg in sorted(package_locs.keys()):
+		print(pkg)
 		if pkg=='TMP':
 			continue
+		if pkg.startswith('linear'):
+			continue
+
 		test_pkg(pkg.lower())
-		#test_pkg_w_bpps(pkg.lower())

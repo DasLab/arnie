@@ -36,6 +36,8 @@ def pfunc(seq, package='vienna_2', T=37,
         float: free energy 
     '''
 
+    if DEBUG: load_package_locations(DEBUG=True)
+
     try:
         pkg, version = package.lower().split('_')
     except:
@@ -49,8 +51,8 @@ def pfunc(seq, package='vienna_2', T=37,
         if linear and pkg not in ['vienna','contrafold','eternafold']:
             print('Warning: LinearPartition only implemented for vienna, contrafold, eternafold.')
 
-    if pkg=='eternafold' and package_locs['eternafoldparams'] is None:
-        raise RuntimeError('Error: need to set path to EternaFold params to use eternafold hotkey.')
+    # if pkg=='eternafold' and not 'eternafoldparams' in package_locs.keys():
+    #     raise RuntimeError('Error: need to set path to EternaFold params to use eternafold hotkey.')
 
     if pseudo and pkg !='nupack':
         raise ValueError('pseudo only for use with nupack')
@@ -98,8 +100,22 @@ def pfunc(seq, package='vienna_2', T=37,
             Z, tmp_file = pfunc_linearpartition_(seq, package='eternafold', bpps=bpps, beam_size=beam_size,
                 return_free_energy=return_free_energy, DEBUG=DEBUG)
         else:
-            Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, constraint=constraint, 
-                bpps=bpps, param_file=package_locs['eternafoldparams'], DIRLOC=DIRLOC, return_free_energy=return_free_energy, DEBUG=DEBUG)
+            # Using contrafold code and eternafold params
+            if 'eternafoldparams' in package_locs.keys() and 'eternafold' not in package_locs.keys():
+                Z, tmp_file = pfunc_contrafold_(seq, T=T, constraint=constraint, 
+                    bpps=bpps, param_file=package_locs['eternafoldparams'], DIRLOC=DIRLOC, return_free_energy=return_free_energy, DEBUG=DEBUG)
+
+            elif 'eternafold' in package_locs.keys():
+                #Using eternafold code and params in eternafold codebase
+                efold_param_file = package_locs['eternafold']+'/../parameters/EternaFoldParams.v1'
+                if not os.path.exists(efold_param_file):
+                    RuntimeError('Error: Parameters not found at %s' % efold_param_file)
+
+                else:
+                    Z, tmp_file = pfunc_contrafold_(seq, T=T, constraint=constraint, 
+                        bpps=bpps, param_file=efold_param_file, DIRLOC= package_locs['eternafold'], return_free_energy=return_free_energy, DEBUG=DEBUG)
+
+
 
     else:
         raise ValueError('package %s not understood.' % package)

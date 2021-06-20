@@ -1,19 +1,19 @@
-import bpps
-import sys
-sample_seq = 'GGGGAAAACCCC'
+from arnie.bpps import bpps
+from arnie.utils import load_package_locations
 
-from utils import load_package_locations_from_yaml
+sample_seq = 'CGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCG'
+
 def test_bpps(pkg):
-	p = bpps.bpps(sample_seq, package = pkg)
+	p = bpps(sample_seq, package = pkg)
 	print('test bpps %s' % pkg)
 	print(p[0])
 	return
 
 if __name__=='__main__':
 	print("Test: printing first row of bpp matrices")
-	package_locs = load_package_locations_from_yaml('user_default.yaml')
+	package_locs = load_package_locations()
 	for pkg in sorted(package_locs.keys()):
-		if pkg=='TMP':
+		if pkg=='TMP' or pkg.startswith('linear'):
 			continue
 
 		test_bpps(pkg.lower())

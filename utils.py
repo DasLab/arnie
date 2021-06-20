@@ -509,20 +509,23 @@ def package_list():
             pkg_list.append(key)
   return pkg_list
 
-def load_package_locations():
+def load_package_locations(DEBUG=False):
     '''Read in user-supplied file to specify paths to RNA folding packages. Specify this in your ~/.bashrc as $ARNIEFILE'''
     return_dct={}
     package_path = os.path.dirname(arnie.__file__)
-    with open("%s" % os.environ["ARNIEFILE"],'r') as f:
-        for line in f.readlines():
-            if line.strip():
-              if not line.startswith('#'):
-                key, string = line.split(':')
-                string = string.strip()
-                return_dct[key] = string
 
-    if 'eternafoldparams' not in return_dct.keys():
-      if 'eternafold' in return_dct.keys():                                         
-        return_dct['eternafoldparams'] = "%s/../parameters/EternaFoldParams.v1" % return_dct['eternafold']
+    if DEBUG: print('Reading Arnie file at %s' % os.environ['ARNIEFILE'])
+    
+    with open("%s" % os.environ["ARNIEFILE"],'r') as f:
+      for line in f.readlines():
+          if line.strip():
+            if not line.startswith('#'):
+              key, string = line.split(':')
+              string = string.strip()
+              return_dct[key] = string
+
+    # if 'eternafoldparams' not in return_dct.keys():
+    #   if 'eternafold' in return_dct.keys():                                         
+    #     return_dct['eternafoldparams'] = "%s/../parameters/EternaFoldParams.v1" % return_dct['eternafold']
 
     return return_dct
