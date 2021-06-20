@@ -44,7 +44,7 @@ linearfold: /path/to/LinearFold/bin
 linearpartition: /path/to/LinearPartition/bin
 
 #directory to write temp files
-TMP: /path/to/TMP/dir
+TMP: /tmp
 ```
 ## EternaFold (`package='eternafold'`)
 
@@ -52,13 +52,21 @@ Go to [https://eternagame.org/about/software](https://eternagame.org/about/softw
 
 ![](doc_ASSETS/Untitled%203.png)
 
-If you get the following error:
-```
-Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
-```
-Try adding `#include <unistd.h>` to `Utilities.hpp`.
+Check the build by running:
 
-To check the build, try running `./contrafold`.
+`./src/contrafold predict test.seq --params parameters/EternaFoldParams.v1`
+
+Output:
+```
+Training mode: 
+Use constraints: 0
+Use evidence: 0
+Predicting using MEA estimator.
+>test.seq
+CGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCG
+>structure
+(((((((((((((......))))))..)....((((.....))))...))))))
+```
 
 Set in your arnie file:
 
@@ -66,6 +74,8 @@ Set in your arnie file:
 #Path to EternaFold
 eternafold: /path/to/EternaFold/src
 ```
+
+EternaFold can also be set up to use the parameters with LinearFold/LinearPartition. For more information, see documentation in [EternaFold](https://eternagame.org/about/software).
 
 ## Vienna RNAFold
 
@@ -149,9 +159,9 @@ Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
 ```
 Try adding `#include <unistd.h>` to `Utilities.hpp`.
 
-To check the build, try running `./contrafold`.
+Check the build by running `./src/contrafold -h`.
 
-Then set in arnie.rc:
+Set in your arnie file:
 
 ```
 # CONTRAfold build
@@ -229,11 +239,13 @@ linearfold: /path/to/LinearFold/bin
 linearpartition: /path/to/LinearPartition/bin
 ```
 
+Note: EternaFold also includes a patch to use EternaFold parameters with LinearFold and LinearPartition. More information available with [EternaFold](https://eternagame.org/about/software).
+
 ## the TMP dir
 
 Last but not least, you'll need to create a directory somewhere where your system calls to all of these packages will be deleting temporary files and then deleting them. Add to arnie file:
 
 ```
 #directory to write temp files
-TMP: /path/to/TMP/dir
+TMP: /tmp
 ```
