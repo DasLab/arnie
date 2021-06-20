@@ -502,7 +502,7 @@ def package_list():
   for key,v in package_dct.items():
     if key != "TMP" and key.lower() != 'bprna':
       if not key.startswith('linear'):
-        if key == 'eternafoldparams':
+        if key == 'eternafoldparams' and 'eternafold' not in pkg_list:
           pkg_list.append('eternafold')
         else:
           if v != "None":
@@ -523,6 +523,6 @@ def load_package_locations():
 
     if 'eternafoldparams' not in return_dct.keys():
       if 'eternafold' in return_dct.keys():                                         
-        return_dct['eternafoldparams'] = "%s/../params/EternaFoldParams.v1" % return_dct['eternafold']
+        return_dct['eternafoldparams'] = "%s/../parameters/EternaFoldParams.v1" % return_dct['eternafold']
 
     return return_dct

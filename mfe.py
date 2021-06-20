@@ -12,7 +12,7 @@ package_locs = load_package_locations()
 def mfe(seq, package='vienna_2', T=37,
     constraint=None, motif=None,
     linear=False, return_dG_MFE = False,
-    dangles=True, noncanonical=False,
+    dangles=True, noncanonical=False, beam_size=100,
     bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False,
     shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False):
     ''' Compute MFE structure (within package) for RNA sequence.
@@ -58,7 +58,7 @@ def mfe(seq, package='vienna_2', T=37,
     if pkg=='vienna':
         if linear:
             if return_dG_MFE:
-                struct, dG_MFE = mfe_linearfold_(seq, package='vienna', return_dG_MFE=return_dG_MFE)
+                struct, dG_MFE = mfe_linearfold_(seq, package='vienna', return_dG_MFE=return_dG_MFE, beam_size=beam_size)
             else:
                 struct = mfe_linearfold_(seq, package='vienna', return_dG_MFE=return_dG_MFE)
         else:
@@ -67,7 +67,7 @@ def mfe(seq, package='vienna_2', T=37,
     elif pkg=='contrafold':
         if linear:
             if return_dG_MFE:
-                struct, dG_MFE = mfe_linearfold_(seq, package='contrafold', return_dG_MFE=return_dG_MFE)
+                struct, dG_MFE = mfe_linearfold_(seq, package='contrafold', return_dG_MFE=return_dG_MFE, beam_size=beam_size)
             else:
                 struct = mfe_linearfold_(seq, package='contrafold', return_dG_MFE=return_dG_MFE)
         else:
@@ -76,7 +76,7 @@ def mfe(seq, package='vienna_2', T=37,
     elif pkg=='eternafold':
         if linear:
             if return_dG_MFE:
-                struct, dG_MFE = mfe_linearfold_(seq, package='eternafold', return_dG_MFE=return_dG_MFE)
+                struct, dG_MFE = mfe_linearfold_(seq, package='eternafold', return_dG_MFE=return_dG_MFE, beam_size=beam_size)
             else:
                 struct = mfe_linearfold_(seq, package='eternafold', return_dG_MFE=return_dG_MFE)
 

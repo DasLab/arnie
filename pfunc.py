@@ -72,7 +72,7 @@ def pfunc(seq, package='vienna_2', T=37,
         else:
             Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, 
                 constraint=constraint, bpps=bpps, param_file=param_file, DIRLOC=DIRLOC,
-                return_free_energy=return_free_energy)
+                return_free_energy=return_free_energy, DEBUG=DEBUG)
 
     elif pkg=='rnastructure':
         Z, tmp_file = pfunc_rnastructure_(seq, version=version, T=T, coaxial=coaxial, 
@@ -225,7 +225,7 @@ def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False,
 
     if DIRLOC is not None:
         LOC=DIRLOC
-    if version.startswith('2'):
+    elif version.startswith('2'):
         LOC=package_locs['contrafold_2']
     elif version.startswith('1'):
         LOC=package_locs['contrafold_1']
