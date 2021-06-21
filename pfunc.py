@@ -523,9 +523,11 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
     else:
         pf_only = 1
 
-    # args: beamsize, is_sharpturn, is_verbose, bpp_file, bpp_prefix, pf_only, bpp_cutoff
+    # args: beamsize, is_sharpturn, is_verbose, bpp_file, bpp_prefix, pf_only, bpp_cutoff,
+    #forest_file, mea, gamma, TK, threshold, ThreshKnot_prefix, MEA_prefix, MEA_bpseq
+
     command=['echo %s | %s/linearpartition_%s' % (seq, LOC, package[0].lower()), str(beam_size),
-     '0', '0', tmp_file, '_', str(pf_only), '0.000001']
+     '0', '0', tmp_file, '_', str(pf_only), '0.000001', '_', '_', '_','_','_','_','_','_']
 
     with open('%s.sh' % tmp_command,'w') as f:
         f.write(' '.join(command))
@@ -557,17 +559,18 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
     else:
 
         if package in ['contrafold','eternafold']:
-            logZ=float(stdout.decode('utf-8').split(' ')[-1])
+            logZ=float(stderr.decode('utf-8').split(' ')[-1])
+            os.remove('_') # tmp file written by linearpartition forest
             if return_free_energy:
                 return -1*logZ, None
             else:
                 return np.exp(logZ), None
 
         elif package=='vienna':
-            free_energy = float(stdout.decode('utf-8').split(' ')[-2])
+            free_energy = float(stderr.decode('utf-8').split(' ')[-2])
             T=37
+            os.remove('_') # tmp file written by linearpartition forest
             if return_free_energy:
                 return free_energy, None
             else:
                 return np.exp(-1*free_energy/(.0019899*(273+T))), None
-
