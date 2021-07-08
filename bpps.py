@@ -12,7 +12,7 @@ package_locs = load_package_locations()
 
 def bpps(sequence, package='vienna', constraint=None, pseudo=False,
          T=37, coaxial=True, linear=False, dna=False,
-        motif=None, dangles=True,param_file=None,reweight=None, beam_size=100):
+        motif=None, dangles=True,param_file=None,reweight=None, beam_size=100, DEBUG=False):
     ''' Compute base pairing probability matrix for RNA sequence.
 
     Args:
@@ -27,6 +27,7 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
     coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
     noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
     beam size (int): Beam size for LinearPartition base pair calculation.
+    DEBUG (bool): Output command-line calls to packages.
 
     Possible packages: 'vienna_2', 'vienna_1','contrafold_1','contrafold_2',
     'nupack_95','nupack_99','rnasoft_2007','rnasoft_1999','rnastructure','vfold_0','vfold_1'
@@ -60,7 +61,7 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
 
         _, tmp_file = pfunc(sequence, package=package, bpps=True, linear=linear,
             motif=motif, constraint=constraint, T=T, coaxial=coaxial,
-             dangles=dangles, param_file=param_file,reweight=reweight, beam_size=beam_size)
+             dangles=dangles, param_file=param_file,reweight=reweight, beam_size=beam_size, DEBUG=DEBUG)
 
         if linear:
             #parse linearpartition output
