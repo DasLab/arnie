@@ -12,7 +12,7 @@ package_locs = load_package_locations()
 
 def bpps(sequence, package='vienna', constraint=None, pseudo=False,
          T=37, coaxial=True, linear=False, dna=False,
-        motif=None, dangles=True,param_file=None,reweight=None, beam_size=100, DEBUG=False):
+        motif=None, dangles=True,param_file=None,reweight=None, beam_size=100, DEBUG=False, threshknot=False):
     ''' Compute base pairing probability matrix for RNA sequence.
 
     Args:
@@ -28,10 +28,11 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
     noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
     beam size (int): Beam size for LinearPartition base pair calculation.
     DEBUG (bool): Output command-line calls to packages.
+    threshknot (bool): calls threshknot to predict pseudoknots (for contrafold with LinearPartition)
 
     Possible packages: 'vienna_2', 'vienna_1','contrafold_1','contrafold_2',
     'nupack_95','nupack_99','rnasoft_2007','rnasoft_1999','rnastructure','vfold_0','vfold_1'
- 
+
     Returns
     array: NxN matrix of base pair probabilities
   '''
@@ -39,7 +40,7 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
         pkg, version = package.lower().split('_')
     except:
         pkg, version = package, None
-        
+
     if motif is not None and pkg != 'vienna':
         raise ValueError('motif option can only be used with Vienna.')
 
@@ -61,7 +62,7 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
 
         _, tmp_file = pfunc(sequence, package=package, bpps=True, linear=linear,
             motif=motif, constraint=constraint, T=T, coaxial=coaxial,
-             dangles=dangles, param_file=param_file,reweight=reweight, beam_size=beam_size, DEBUG=DEBUG)
+             dangles=dangles, param_file=param_file,reweight=reweight, beam_size=beam_size, DEBUG=DEBUG, threshknot=threshknot)
 
         if linear:
             #parse linearpartition output
@@ -71,7 +72,7 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
             if 'contrafold' in package:
                 return bpps_contrafold_(sequence, tmp_file)
             if package=='eternafold':
-                return bpps_contrafold_(sequence, tmp_file)                
+                return bpps_contrafold_(sequence, tmp_file)
             elif 'vienna' in package:
                 return bpps_vienna_(sequence, tmp_file)
             elif 'rnasoft' in package:
@@ -135,7 +136,7 @@ def bpps_rnasoft_(sequence, tmp_file):
 def bpps_nupack_(sequence, version='95', T=37, dangles=True, pseudo=False,dna=False):
 
     if not version: version='95'
-    
+
     nupack_materials={'95': 'rna1995', '99': 'rna1999'}
 
     if dna:
@@ -212,7 +213,7 @@ def bpps_rnastructure_(sequence, tmp_file, coaxial=True):
             i, j, p = int(fields[0])-1, int(fields[1])-1, 10**(-1*float(fields[2]))
             probs[i,j] = p
             probs[j,i] = p
-    
+
     os.remove(outfile)
     os.remove(pfsfile)
     return probs
@@ -267,7 +268,7 @@ def bpps_vfold_(sequence, version='0',T=37, coaxial=True):
     os.remove(outfile)
 
     return probs
-    #output: take second field of last line for Z 
+    #output: take second field of last line for Z
 
 
 def bpps_linearpartition_(sequence, tmp_file):
@@ -288,6 +289,3 @@ def bpps_linearpartition_(sequence, tmp_file):
     os.remove(fname)
 
     return probs
-
-
-
