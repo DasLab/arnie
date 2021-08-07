@@ -168,6 +168,14 @@ Set in your arnie file:
 contrafold_2: /path/to/contrafold-se/src
 ```
 
+If you get the error:
+
+```
+‘LONG_MIN’ was not declared in this scope
+```
+
+Try adding `#include <climits>` to Utilities.hpp.
+
 ## RNAStructure (`package='rnastructure'`)
 
 Download RNAstructure (pre-compiled command-line interface) for your OS from [https://rna.urmc.rochester.edu/RNAstructure.html](https://rna.urmc.rochester.edu/RNAstructure.html).
