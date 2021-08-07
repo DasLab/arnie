@@ -16,5 +16,19 @@ vienna_2: /path/to/ViennaRNA-2.4.10/src/bin
 vienna_1: /path/to/ViennaRNA-1.8.5/bin
 nupack: /path/to/nupack3.2.2/build/bin
 
+# for linear partition
+linearfold: /path/to/LinearFold/bin
+linearpartition: /path/to/LinearPartition/bin
+
+# for PK predictors
+hotknots: /path/to/HotKnots_v2.0/bin
+ipknot: /path/to/ipknot/build
+knotty: /path/to/Knotty
+pknots: /path/to/PKNOTS/bin
+spotrna: /path/to/SPOT-RNA
+spotrna_conda_env: /path/to/conda/envs/spotrna/bin
+e2efold: /path/to/e2efold/e2efold_productive
+e2efold_conda_env: path/to/conda/envs/e2efold/bin
+
 #TMP: location for tmp files for packages. Update to where you want your tmp files stored.
 TMP: /tmp
