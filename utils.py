@@ -624,7 +624,7 @@ def bpseq_to_bp_list(bpseq_file, header_length=1):
         bp = bp.split()[::2]
         bp = [int(nt) for nt in bp]
         if bp[1] != 0 and bp[0] < bp[1]:
-            bp_list.append(bp)
+            bp_list.append([bp[0] - 1, bp[1] - 1])
     return bp_list
 
 
@@ -641,7 +641,7 @@ def ct_to_bp_list(ct_file, header_length=1):
         if len(bp) != 0:
             bp = [int(nt) for nt in bp]
             if bp[1] != 0 and bp[0] < bp[1]:
-                bp_list.append(bp)
+                bp_list.append([bp[0] - 1, bp[1] - 1])
     return bp_list
 
 

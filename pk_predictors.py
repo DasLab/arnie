@@ -1,13 +1,13 @@
 import subprocess as sp
 from arnie.utils import *
 import glob
-from os import getcwd, chdir, remove, mkdir, rmdir
+from os import getcwd, chdir, remove, mkdir, rmdir, path
 from scipy.optimize import linear_sum_assignment
 
 
 # TODO script all previous investigations
-
-# TODO pk_predict options
+# TODO Debug modes to print output and err to help with install issues
+# TODO pk_predict options +
 
 package_locs = load_package_locations()
 
@@ -46,7 +46,7 @@ def pk_predict(seq, predictor,
     elif predictor == "knotty":
         return _knotty_mfe(seq)
     elif predictor == "hotknots":
-        if model is "default":
+        if model == "default":
             model = "DP"
         if model not in ["CC", "RE", "DP"]:
             raise ValueError('Only CC, RE, DP model implemented for hotknots.')
@@ -54,7 +54,7 @@ def pk_predict(seq, predictor,
             raise ValueError('Only parameters_CC06.txt, parameters_CC09.txt, parameters_DP03.txt, parameters_DP09.txt parameters implemented for hotknots.')
         return _run_hotknots(seq, model=model, param=param)[0][0]
     elif predictor == "ipknot":
-        if model is "default":
+        if model == "default":
             model = "LinearPartition-C"
         if model not in ["LinearPartition-C", "LinearPartition-V", "Boltzmann", "ViennaRNA", "CONTRAfold", "NUPACK"]:
             raise ValueError('Only LinearPartition-C, LinearPartition-V, Boltzmann, ViennaRNA, CONTRAfold, NUPACK model implemented for ipknot.')
@@ -262,7 +262,10 @@ def _knotty_mfe(seq):
     command = [f"{knotty_location}/knotty", seq]
     out, err = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE).communicate()
     output = out.decode().split("\n")
-    return output[1].split(" ")[1]
+    struct = output[1].split(" ")[1]
+    bp_list = convert_dotbracket_to_bp_list(struct, allow_pseudoknots=True)
+    struct = convert_bp_list_to_dotbracket(bp_list, seq_len=len(struct))
+    return struct
 
 
 def _run_spotrna(seq, cpu=32):
@@ -272,10 +275,11 @@ def _run_spotrna(seq, cpu=32):
     spotrna_location = package_locs["spotrna"]
     spotrna_conda_env = package_locs["spotrna_conda_env"]
     out_folder = "temp"
-    mkdir(out_folder)
+    if not path.isdir(out_folder):
+        mkdir(out_folder)
     fasta_file = "temp.fasta"
     f = open(fasta_file, "w")
-    f.write(">seq \n")
+    f.write(">seq\n")
     f.write(seq)
     f.close()
     command = [f"{spotrna_conda_env}/python3", f"{spotrna_location}/SPOT-RNA.py", "--inputs", fasta_file, "--outputs", out_folder, "--cpu", str(cpu)]
