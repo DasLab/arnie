@@ -851,10 +851,8 @@ def compare_structures_to_natives(structs, natives, comparison="basepairs", metr
     elif metric == "sensitivity":
         return sen
     elif metric == "F1_score":
-        F1 = (2 * PPV * sen) / (sen + PPV)
         return F1
     elif metric == "all":
-        F1 = (2 * PPV * sen) / (sen + PPV)
         return {"PPV": PPV, "sensitivity": sen, "F1_score": F1}
 
 
