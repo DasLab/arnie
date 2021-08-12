@@ -12,6 +12,23 @@ You don't have to install all of the packages described here for Arnie to work. 
 
 This document contains instructions to download, compile where needed, and set paths for all the major packages and versions that Arnie supports. This document does not describe the python syntax -- for that, go to `notebooks/start_here.ipynb`.
 
+### Point python to arnie location and define Arnie file location
+
+1. Add Arnie location to your python path in your .bashrc, i.e.
+
+```
+export PYTHONPATH=$PYTHONPATH:/path/to/arnie
+```
+
+2. Create a variable in your .bashrc:
+
+```
+export ARNIEFILE="/path/to/arnie/my_arnie_file.txt"
+```
+Next we're going to create that arnie file.
+
+### Creating the Arnie file
+
 At the end of the day you'll have an example arnie file that looks like this:
 
 ```
