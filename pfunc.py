@@ -543,10 +543,13 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
     # args: beamsize, is_sharpturn, is_verbose, bpp_file, bpp_prefix, pf_only, bpp_cutoff,
     #forest_file, mea, gamma, TK, threshold, ThreshKnot_prefix, MEA_prefix, MEA_bpseq
 
+    # args: beamsize, is_sharpturn, is_verbose, bpp_file, bpp_prefix, pf_only, bpp_cutoff,
+    #forest_file, mea, gamma, TK, threshold, ThreshKnot_prefix, MEA_prefix, MEA_bpseq, shape_file_path
+
     #threshknot threshold set to default 0.3
 
     command=['echo %s | %s/linearpartition_%s' % (seq, LOC, package[0].lower()), str(beam_size),
-     '0', '0', tmp_file, '_', str(pf_only), '0.000001', '_', '_', '_','%s' % (TK),'_','_','_','_']
+     '0', '0', tmp_file, '_', str(pf_only), '0.000001', '_', '_', '_','%s' % (TK),'_','_','_','_',"''"]
 
     with open('%s.sh' % tmp_command,'w') as f:
         f.write(' '.join(command))
