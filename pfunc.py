@@ -109,18 +109,21 @@ def pfunc(seq, package='vienna_2', T=37,
         else:
             # Using contrafold code and eternafold params
             if 'eternafoldparams' in package_locs.keys() and 'eternafold' not in package_locs.keys():
-                Z, tmp_file = pfunc_contrafold_(seq, T=T, constraint=constraint,
+                Z, tmp_file = pfunc_contrafold_(seq, T=T, constraint=constraint, 
                     bpps=bpps, param_file=package_locs['eternafoldparams'], DIRLOC=DIRLOC, return_free_energy=return_free_energy, DEBUG=DEBUG)
 
-            elif 'eternafold' in package_locs.keys():
+            elif 'eternafold' in package_locs.keys() and param_file is None:
                 #Using eternafold code and params in eternafold codebase
                 efold_param_file = package_locs['eternafold']+'/../parameters/EternaFoldParams.v1'
                 if not os.path.exists(efold_param_file):
                     RuntimeError('Error: Parameters not found at %s' % efold_param_file)
 
                 else:
-                    Z, tmp_file = pfunc_contrafold_(seq, T=T, constraint=constraint,
+                    Z, tmp_file = pfunc_contrafold_(seq, T=T, constraint=constraint, 
                         bpps=bpps, param_file=efold_param_file, DIRLOC= package_locs['eternafold'], return_free_energy=return_free_energy, DEBUG=DEBUG)
+            elif 'eternafold' in package_locs.keys() and param_file is not None:
+                    Z, tmp_file = pfunc_contrafold_(seq, T=T, constraint=constraint, 
+                        bpps=bpps, param_file=param_file, DIRLOC= package_locs['eternafold'], return_free_energy=return_free_energy, DEBUG=DEBUG)                
 
 
 
@@ -132,8 +135,10 @@ def pfunc(seq, package='vienna_2', T=37,
 
     else:
         if tmp_file:
-            if os.path.exists(tmp_file):
+            try:
                 os.remove(tmp_file)
+            except:
+                pass
         return Z
 
 def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=None,
