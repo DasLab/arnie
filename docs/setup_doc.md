@@ -254,6 +254,20 @@ cd LinearPartition
 make
 ```
 
+This was most recently validated with LinearPartition commit `694b70a` and LinearFold commit `260c6bb`. Note that future commits that add more command-line options are likely to break this current wrapper. 
+
+Check out these particular commits using
+
+```
+git clone https://github.com/LinearFold/LinearFold.git
+cd LinearFold
+git reset --hard 260c6bbb9bf8cc84b807fa7633b9cb731e639884
+
+git clone https://github.com/LinearFold/LinearPartition.git
+cd LinearPartition
+git reset --hard 694b70a4d842af543d3f135af212fcb14a668bfd
+```
+
 add to arnie file:
 
 ```
