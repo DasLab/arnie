@@ -549,7 +549,7 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
     #threshknot threshold set to default 0.3
 
     command=['echo %s | %s/linearpartition_%s' % (seq, LOC, package[0].lower()), str(beam_size),
-     '0', '0', tmp_file, '_', str(pf_only), '0.000001', '_', '_', '_','%s' % (TK),'_','_','_','_',"''"]
+     '0', '0', tmp_file, "''", str(pf_only), '0.000001', "''", "''", "''",'%s' % (TK), "''", "''", "''", "''", "''"]
 
     with open('%s.sh' % tmp_command,'w') as f:
         f.write(' '.join(command))
