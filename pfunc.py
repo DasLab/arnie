@@ -549,7 +549,7 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
     #threshknot threshold set to default 0.3
 
     command=['echo %s | %s/linearpartition_%s' % (seq, LOC, package[0].lower()), str(beam_size),
-     '0', '0', tmp_file, '_', str(pf_only), '0.000001', '_', '_', '_','%s' % (TK),'_','_','_','_',"''"]
+     '0', '0', tmp_file, "''", str(pf_only), '0.000001', "''", "''", "''",'%s' % (TK), "''", "''", "''", "''", "''"]
 
     with open('%s.sh' % tmp_command,'w') as f:
         f.write(' '.join(command))
@@ -582,7 +582,7 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
 
         if package in ['contrafold','eternafold']:
             logZ=float(stderr.decode('utf-8').split(' ')[-1])
-            os.remove('_') # tmp file written by linearpartition forest
+            #os.remove('_') # tmp file written by linearpartition forest
             if return_free_energy:
                 return -1*logZ, None
             else:
@@ -591,7 +591,7 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
         elif package=='vienna':
             free_energy = float(stderr.decode('utf-8').split(' ')[-2])
             T=37
-            os.remove('_') # tmp file written by linearpartition forest
+            #os.remove('_') # tmp file written by linearpartition forest
             if return_free_energy:
                 return free_energy, None
             else:
