@@ -582,7 +582,7 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
 
         if package in ['contrafold','eternafold']:
             logZ=float(stderr.decode('utf-8').split(' ')[-1])
-            os.remove('_') # tmp file written by linearpartition forest
+            #os.remove('_') # tmp file written by linearpartition forest
             if return_free_energy:
                 return -1*logZ, None
             else:
@@ -591,7 +591,7 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
         elif package=='vienna':
             free_energy = float(stderr.decode('utf-8').split(' ')[-2])
             T=37
-            os.remove('_') # tmp file written by linearpartition forest
+            #os.remove('_') # tmp file written by linearpartition forest
             if return_free_energy:
                 return free_energy, None
             else:
