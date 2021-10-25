@@ -13,14 +13,14 @@ def pfunc(seq, package='vienna_2', T=37,
     constraint=None, motif=None, linear=False,
     dangles=True, noncanonical=False, pseudo=False, dna=False, DIRLOC=None,
     bpps=False, param_file=None, coaxial=True, reweight=None,
-    return_free_energy = False, beam_size=100, DEBUG=False):
+    return_free_energy = False, beam_size=100, DEBUG=False, threshknot=False):
     ''' Compute partition function for RNA sequence.
 
         Args:
         seq (str): nucleic acid sequence
         T (float): temperature (Celsius)
         constraint (str): structure constraints
-        motif (str): argument to vienna motif 
+        motif (str): argument to vienna motif
         linear (bool): call LinearPartition to estimate Z in Vienna or Contrafold
         pseudo (bool): nupack only, make prediction with pseudoknots
         dna (bool): nupack only, make prediction for DNA
@@ -28,12 +28,13 @@ def pfunc(seq, package='vienna_2', T=37,
         coaxial (bool): coaxial stacking or not, specifiable for rnastructure, vfold
         noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
         beam_size (int): beam size option for LinearPartition.
+        threshknot (bool): call threshknot to predict pseudoknots (for contrafold, using LinearPartition)
 
-        Possible packages: 
+        Possible packages:
         'vienna_2', 'vienna_1','contrafold_1','contrafold_2','nupack_95','nupack_99','rnasoft_2007','rnasoft_1999','rnastructure','vfold_0','vfold_1'
-        
+
     Returns
-        float: free energy 
+        float: free energy
     '''
 
     if DEBUG: load_package_locations(DEBUG=True)
@@ -57,6 +58,12 @@ def pfunc(seq, package='vienna_2', T=37,
     if pseudo and pkg !='nupack':
         raise ValueError('pseudo only for use with nupack')
 
+    if threshknot:
+        if pkg !='contrafold':
+            print('Warning: ThreshKnot only implemented for Contrafold')
+        elif not linear:
+            print('Warning: ThreshKnot only implemented with LinearPartition')
+
     if pkg=='vienna':
         if linear:
             Z, tmp_file = pfunc_linearpartition_(seq, package='vienna',bpps=bpps, beam_size=beam_size,
@@ -66,18 +73,18 @@ def pfunc(seq, package='vienna_2', T=37,
             Z, tmp_file = pfunc_vienna_(seq, version=version, T=T, dangles=dangles,
              constraint=constraint, motif=motif, bpps=bpps, param_file=param_file,
              reweight=reweight, return_free_energy=return_free_energy, DEBUG=DEBUG)
-     
+
     elif pkg=='contrafold':
         if linear:
             Z, tmp_file = pfunc_linearpartition_(seq, package='contrafold', bpps=bpps, beam_size=beam_size,
-                return_free_energy=return_free_energy, DEBUG=DEBUG)
+                return_free_energy=return_free_energy, DEBUG=DEBUG, threshknot=threshknot)
         else:
-            Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T, 
+            Z, tmp_file = pfunc_contrafold_(seq, version=version, T=T,
                 constraint=constraint, bpps=bpps, param_file=param_file, DIRLOC=DIRLOC,
                 return_free_energy=return_free_energy, DEBUG=DEBUG)
 
     elif pkg=='rnastructure':
-        Z, tmp_file = pfunc_rnastructure_(seq, version=version, T=T, coaxial=coaxial, 
+        Z, tmp_file = pfunc_rnastructure_(seq, version=version, T=T, coaxial=coaxial,
             constraint=constraint, bpps=bpps, return_free_energy=return_free_energy, DEBUG=DEBUG)
 
     elif pkg=='rnasoft':
@@ -119,6 +126,7 @@ def pfunc(seq, package='vienna_2', T=37,
                         bpps=bpps, param_file=param_file, DIRLOC= package_locs['eternafold'], return_free_energy=return_free_energy, DEBUG=DEBUG)                
 
 
+
     else:
         raise ValueError('package %s not understood.' % package)
 
@@ -141,7 +149,7 @@ def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_fil
         seq (str): nucleic acid sequence
         T (float): temperature
         constraint (str): structure constraints
-        motif (str): argument to vienna motif  
+        motif (str): argument to vienna motif
     Returns
         str, float: secondary structure representation and Z
     """
@@ -181,7 +189,7 @@ def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_fil
 
     if not dangles:
         command.append('--dangles=0')
-        
+
     if reweight is not None:
         command.append('--commands=%s' % reweight)
 
@@ -199,7 +207,7 @@ def pfunc_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_fil
         print(stdout)
         print('stderr')
         print(stderr)
-        
+
     if stderr.decode('utf-8').startswith('WARNING: '):
         print(stderr)
 
@@ -232,7 +240,7 @@ def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False,
         seq (str): nucleic acid sequence
         T (float): temperature
         constraint (str): structure constraints
-        motif (str): argument to vienna motif  
+        motif (str): argument to vienna motif
 
         DIRLOC: sets location of contrafold specifically (Useful if there's several EternaFold builds to compare.)
     Returns
@@ -360,7 +368,7 @@ def pfunc_nupack_(seq, version='95', T=37, dangles=True, constraint=None, return
         seqfile = write([seq, constraint])
         command=['%s/energy' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T),
              '-material', nupack_materials[version], '-dangles', dangle_option]
-       
+
     else:
         seqfile = write([seq])
         command=['%s/pfunc' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T),
@@ -405,7 +413,7 @@ def pfunc_rnastructure_(seq, version=None, T=37, constraint=None, coaxial=True,
         seq (str): nucleic acid sequence
         T (float): temperature
         constraint (str): structure constraints
-        motif (str): argument to vienna motif  
+        motif (str): argument to vienna motif
         coaxial (bool): Coaxial stacking or not (default True)
     Returns
         float: partition function
@@ -514,10 +522,10 @@ def pfunc_vfold_(seq, version='0', T=37, coaxial=True, bpps=False, DEBUG=False):
 
     os.remove(seqfile)
     return Z, None
-    #output: take second field of last line for Z 
+    #output: take second field of last line for Z
 
 
-def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100, return_free_energy=False, DEBUG=False):
+def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100, return_free_energy=False, DEBUG=False, threshknot=False):
     LOC = package_locs['linearpartition']
     tmp_file = filename()
     tmp_command = filename()
@@ -527,11 +535,21 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
     else:
         pf_only = 1
 
+    if threshknot:
+        TK = '-T'
+    else:
+        TK = '_'
+
     # args: beamsize, is_sharpturn, is_verbose, bpp_file, bpp_prefix, pf_only, bpp_cutoff,
     #forest_file, mea, gamma, TK, threshold, ThreshKnot_prefix, MEA_prefix, MEA_bpseq
 
+    # args: beamsize, is_sharpturn, is_verbose, bpp_file, bpp_prefix, pf_only, bpp_cutoff,
+    #forest_file, mea, gamma, TK, threshold, ThreshKnot_prefix, MEA_prefix, MEA_bpseq, shape_file_path
+
+    #threshknot threshold set to default 0.3
+
     command=['echo %s | %s/linearpartition_%s' % (seq, LOC, package[0].lower()), str(beam_size),
-     '0', '0', tmp_file, '_', str(pf_only), '0.000001', '_', '_', '_','_','_','_','_','_']
+     '0', '0', tmp_file, "''", str(pf_only), '0.000001', "''", "''", "''",'%s' % (TK), "''", "''", "''", "''", "''"]
 
     with open('%s.sh' % tmp_command,'w') as f:
         f.write(' '.join(command))
@@ -564,7 +582,7 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
 
         if package in ['contrafold','eternafold']:
             logZ=float(stderr.decode('utf-8').split(' ')[-1])
-            os.remove('_') # tmp file written by linearpartition forest
+            #os.remove('_') # tmp file written by linearpartition forest
             if return_free_energy:
                 return -1*logZ, None
             else:
@@ -573,7 +591,7 @@ def pfunc_linearpartition_(seq, bpps=False, package='contrafold', beam_size=100,
         elif package=='vienna':
             free_energy = float(stderr.decode('utf-8').split(' ')[-2])
             T=37
-            os.remove('_') # tmp file written by linearpartition forest
+            #os.remove('_') # tmp file written by linearpartition forest
             if return_free_energy:
                 return free_energy, None
             else:

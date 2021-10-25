@@ -12,6 +12,23 @@ You don't have to install all of the packages described here for Arnie to work. 
 
 This document contains instructions to download, compile where needed, and set paths for all the major packages and versions that Arnie supports. This document does not describe the python syntax -- for that, go to `notebooks/start_here.ipynb`.
 
+### Point python to arnie location and define Arnie file location
+
+1. Add Arnie location to your python path in your .bashrc, i.e.
+
+```
+export PYTHONPATH=$PYTHONPATH:/path/to/arnie
+```
+
+2. Create a variable in your .bashrc:
+
+```
+export ARNIEFILE="/path/to/arnie/my_arnie_file.txt"
+```
+Next we're going to create that arnie file.
+
+### Creating the Arnie file
+
 At the end of the day you'll have an example arnie file that looks like this:
 
 ```
@@ -168,6 +185,14 @@ Set in your arnie file:
 contrafold_2: /path/to/contrafold-se/src
 ```
 
+If you get the error:
+
+```
+‘LONG_MIN’ was not declared in this scope
+```
+
+Try adding `#include <climits>` to Utilities.hpp.
+
 ## RNAStructure (`package='rnastructure'`)
 
 Download RNAstructure (pre-compiled command-line interface) for your OS from [https://rna.urmc.rochester.edu/RNAstructure.html](https://rna.urmc.rochester.edu/RNAstructure.html).
@@ -227,6 +252,20 @@ cd ..
 git clone https://github.com/LinearFold/LinearPartition.git
 cd LinearPartition
 make
+```
+
+This was most recently validated with LinearPartition commit `694b70a` and LinearFold commit `260c6bb`. Note that future commits that add more command-line options are likely to break this current wrapper. 
+
+Check out these particular commits using
+
+```
+git clone https://github.com/LinearFold/LinearFold.git
+cd LinearFold
+git reset --hard 260c6bbb9bf8cc84b807fa7633b9cb731e639884
+
+git clone https://github.com/LinearFold/LinearPartition.git
+cd LinearPartition
+git reset --hard 694b70a4d842af543d3f135af212fcb14a668bfd
 ```
 
 add to arnie file:

@@ -78,10 +78,11 @@ class MEA:
             if np.abs(i - j) > 1:
                 if [j,i] not in self.MEA_bp_list:
                     self.MEA_bp_list.append([i,j])
-                    self.structure[i] = '('
-                    self.structure[j] = ')'
-        print('Warning: formatting pseudoknotted dot-bracket structures not yet supported. Any pseudoknotted stems will only appear as parentheses (not brackets).')
-        self.structure = ''.join(self.structure)
+                    #self.structure[i] = '('
+                    #self.structure[j] = ')'
+        #print('Warning: formatting pseudoknotted dot-bracket structures not yet supported. Any pseudoknotted stems will only appear as parentheses (not brackets).')
+        #self.structure = ''.join(self.structure)
+        self.structure = convert_bp_list_to_dotbracket(self.MEA_bp_list,len(self.bpps))
 
         if not self.evaluated: self.evaluated = True
 
