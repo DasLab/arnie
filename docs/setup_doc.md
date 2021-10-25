@@ -349,9 +349,14 @@ The package can be found here [https://github.com/EddyRivasLab/PKNOTS](https://g
 ```
 git clone https://github.com/EddyRivasLab/PKNOTS.git
 cd PKNOTS
+mkdir lib
 cd lib
 git clone https://github.com/EddyRivasLab/easel.git
-cd ..
+cd easel
+autoconf
+./configure
+make
+cd ../../
 ./configure
 make
 make install
