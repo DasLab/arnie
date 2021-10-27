@@ -386,19 +386,3 @@ To test run `python3 SPOT-RNA.py -h`
 
 To obtain the location of the conda environment type `conda info --envs`. Note you do not have to have the environment active when running the code as long as you correctly list spotrna_conda_env in the arnie file.
 
-## e2efold (`predictor='e2efold'`)
-
-The package can be found here [https://github.com/ml4bio/e2efold](https://github.com/ml4bio/e2efold).
-
-```
-git clone https://github.com/ml4bio/e2efold.git
-cd e2efold
-conda env create -f environment.yml
-source activate rna_ss
-pip install -e .
-```
-
-To test, in the e2efold directory run `python e2efold_productive/e2efold_productive_short.py -h`.
-
-To obtain the location of the conda environment type `conda info --envs`. Note you do not have to have the environment active when running the code as long as you correctly list spotrna_conda_env in the arnie file.
-
