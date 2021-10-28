@@ -176,7 +176,7 @@ Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
 ```
 Try adding `#include <unistd.h>` to `Utilities.hpp`.
 
-Check the build by running `./src/contrafold -h`.
+Check the build by running `echo CGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCG > test.fasta && ./contrafold predict test.fasta && rm test.fasta`.
 
 Set in your arnie file:
 
