@@ -309,7 +309,7 @@ e2efold_conda_env: path/to/conda/envs/e2efold/bin
 
 Download the source code of HotKnots 2.0 directly from [http://www.cs.ubc.ca/labs/beta/Software/HotKnots/](http://www.cs.ubc.ca/labs/beta/Software/HotKnots/) and unzip the folder. The files are pre-compiled and so, on most systems, nothing more has to be done. If you need to compile the files type `make` in the HotKnots directory.
 
-Check the build by running `hotspot/HotKnot -h` in the HotKnots directory.
+Check the build by running `cd hotspot && ./HotKnot -h` in the HotKnots directory.
 
 ## ipknot (`predictor='ipknot'`)
 
