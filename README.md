@@ -61,10 +61,10 @@ See `examples/start_here.ipynb` for example syntax. In brief, comparing across p
 ```
 from arnie.bpps import bpps
 
-bpps={}
+bpp_dict={}
 
 for pkg in ['vienna','nupack','RNAstructure','contrafold','RNAsoft']:
-    bpps[package] = bpps(my_sequence, package=pkg)
+    bpps_dict[package] = bpps(my_sequence, package=pkg)
 ```
 ![](assets/example_base_pair_matrices.png)
 
