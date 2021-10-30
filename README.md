@@ -63,7 +63,7 @@ from arnie.bpps import bpps
 
 bpp_dict={}
 
-for pkg in ['vienna','nupack','RNAstructure','contrafold','RNAsoft']:
+for pkg in ['vienna','nupack','rnastructure','contrafold','rnasoft']:
     bpp_dict[pkg] = bpps(my_sequence, package=pkg)
 ```
 ![](assets/example_base_pair_matrices.png)
