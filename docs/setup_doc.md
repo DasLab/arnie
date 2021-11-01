@@ -176,7 +176,7 @@ Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
 ```
 Try adding `#include <unistd.h>` to `Utilities.hpp`.
 
-Check the build by running `./src/contrafold -h`.
+Check the build by running `echo CGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCG > test.fasta && ./contrafold predict test.fasta && rm test.fasta`.
 
 Set in your arnie file:
 
@@ -309,7 +309,7 @@ e2efold_conda_env: path/to/conda/envs/e2efold/bin
 
 Download the source code of HotKnots 2.0 directly from [http://www.cs.ubc.ca/labs/beta/Software/HotKnots/](http://www.cs.ubc.ca/labs/beta/Software/HotKnots/) and unzip the folder. The files are pre-compiled and so, on most systems, nothing more has to be done. If you need to compile the files type `make` in the HotKnots directory.
 
-Check the build by running `hotspot/HotKnot -h` in the HotKnots directory.
+Check the build by running `cd hotspot && ./HotKnot -h` in the HotKnots directory.
 
 ## ipknot (`predictor='ipknot'`)
 
@@ -349,9 +349,14 @@ The package can be found here [https://github.com/EddyRivasLab/PKNOTS](https://g
 ```
 git clone https://github.com/EddyRivasLab/PKNOTS.git
 cd PKNOTS
+mkdir lib
 cd lib
 git clone https://github.com/EddyRivasLab/easel.git
-cd ..
+cd easel
+autoconf
+./configure
+make
+cd ../../
 ./configure
 make
 make install
@@ -378,22 +383,6 @@ while read p; do conda install --yes $p; done < requirements.txt
 ```
 
 To test run `python3 SPOT-RNA.py -h`
-
-To obtain the location of the conda environment type `conda info --envs`. Note you do not have to have the environment active when running the code as long as you correctly list spotrna_conda_env in the arnie file.
-
-## e2efold (`predictor='e2efold'`)
-
-The package can be found here [https://github.com/ml4bio/e2efold](https://github.com/ml4bio/e2efold).
-
-```
-git clone https://github.com/ml4bio/e2efold.git
-cd e2efold
-conda env create -f environment.yml
-source activate rna_ss
-pip install -e .
-```
-
-To test, in the e2efold directory run `python e2efold_productive/e2efold_productive_short.py -h`.
 
 To obtain the location of the conda environment type `conda info --envs`. Note you do not have to have the environment active when running the code as long as you correctly list spotrna_conda_env in the arnie file.
 
