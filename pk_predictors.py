@@ -220,7 +220,10 @@ def _run_hotknots(seq, model="DP", param="parameters_DP03.txt"):
     cur_dir = getcwd()
     chdir(hotknot_location)
     command = [f"{hotknot_location}/HotKnots", "-noPS", "-s", seq, "-m", model, "-p", f"{hotknot_location}/params/{param}"]
-    out, err = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE).communicate()
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+    out, err = p.communicate()
+    if p.returncode:
+        raise Exception('spotrna failed: on %s\n%s\n%s' % (seq, out, err))
     output = out.decode().split("\n")[2:-1]
     structs = []
     for struct in output:
@@ -251,7 +254,10 @@ def _ipknot_mfe(seq, model="LinearPartition-C", refinement=1, t1="auto", t2="aut
     f.write(seq)
     f.close()
     command = [f"{ipknot_location}/ipknot", fasta_file, "--model", model, "-r", str(refinement), "-t", str(t1), "-t", str(t2)]
-    out, err = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE).communicate()
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+    out, err = p.communicate()
+    if p.returncode:
+        raise Exception('spotrna failed: on %s\n%s\n%s' % (seq, out, err))
     output = out.decode().split("\n")
     remove(fasta_file)
     return output[2]
@@ -260,7 +266,10 @@ def _ipknot_mfe(seq, model="LinearPartition-C", refinement=1, t1="auto", t2="aut
 def _knotty_mfe(seq):
     knotty_location = package_locs["knotty"]
     command = [f"{knotty_location}/knotty", seq]
-    out, err = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE).communicate()
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+    out, err = p.communicate()
+    if p.returncode:
+        raise Exception('spotrna failed: on %s\n%s\n%s' % (seq, out, err))
     output = out.decode().split("\n")
     struct = output[1].split(" ")[1]
     bp_list = convert_dotbracket_to_bp_list(struct, allow_pseudoknots=True)
@@ -283,7 +292,10 @@ def _run_spotrna(seq, cpu=32):
     f.write(seq)
     f.close()
     command = [f"{spotrna_conda_env}/python3", f"{spotrna_location}/SPOT-RNA.py", "--inputs", fasta_file, "--outputs", out_folder, "--cpu", str(cpu)]
-    out, err = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE).communicate()
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+    out, err = p.communicate()
+    if p.returncode:
+        raise Exception('spotrna failed: on %s\n%s\n%s' % (seq, out, err))
     bp_list = bpseq_to_bp_list(out_folder + "/seq.bpseq")
     struct = convert_bp_list_to_dotbracket(bp_list, len(seq))
     bpp = prob_to_bpp(out_folder + "/seq.prob")
@@ -335,8 +347,11 @@ def _pknots(seq):
     f.close()
     outfile = "out.out"
     command = [pknots_location + "/pknots", "-k", "-g", fasta_file, outfile]
-    out, err = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE).communicate()
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+    out, err = p.communicate()
     remove(fasta_file)
+    if p.returncode:
+        raise Exception('PKNOTS failed: on %s\n%s\n%s' % (seq, out, err))
     bp_list = ct_to_bp_list(outfile, 4)
     remove(outfile)
     struct = convert_bp_list_to_dotbracket(bp_list, len(seq))
