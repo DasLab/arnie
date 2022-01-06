@@ -14,7 +14,7 @@ def mfe(seq, package='vienna_2', T=37,
     linear=False, return_dG_MFE = False,
     dangles=True, noncanonical=False, beam_size=100,
     bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False,
-    probing_signal=None,probing_kws=None,
+    probing_signal=None,probing_kws=None, pseudo=False,
     shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False):
 
     ''' Compute MFE structure (within package) for RNA sequence.
@@ -34,7 +34,7 @@ def mfe(seq, package='vienna_2', T=37,
         noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
         shape_signal(list): list of normalized SHAPE reactivities, with negative values indicating no signal
         dms_signal(list): list of normalized DMS reactivities, with negative values indicating no signal
-        pseudoknots: if True, will predict pseudoknots
+        pseudo: if True, will predict pseudoknots
 
         Possible packages: 
         'vienna_2', 'vienna_1','contrafold_1','contrafold_2', 'rnastructure'
@@ -66,7 +66,7 @@ def mfe(seq, package='vienna_2', T=37,
     if linear and pkg not in ['vienna','contrafold','eternafold']:
         print('Warning: LinearFold only implemented for vienna, contrafold, eternafold.')
 
-    if pseudoknots and not pkg in ['rnastructure', 'nupack']:
+    if pseudo and not pkg in ['rnastructure', 'nupack']:
         print('Warning: %s and pseudoknots not supported in Arnie yet' % pkg)
 
     if pkg=='vienna':
@@ -117,7 +117,7 @@ def mfe(seq, package='vienna_2', T=37,
             struct = mfe_rnastructure_(seq, version=version, T=T, constraint=constraint, 
                 probing_signal=probing_signal,
                 param_file=param_file, shape_signal=shape_signal, dms_signal=dms_signal, 
-                shape_file=shape_file, dms_file=dms_file, pseudoknots = pseudoknots)
+                shape_file=shape_file, dms_file=dms_file, pseudo = pseudo)
     else:
         raise ValueError('package %s not understood.' % package)
 
@@ -201,7 +201,7 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
         return stdout.decode('utf-8').split('\n')[1].split(' ')[0]
 
 def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None, probing_signal=None,probing_kws=None,
-    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pseudoknots=False):
+    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pseudo=False):
     """get minimum free energy structure
         with SHAPE or DMS data, uses the default slope and intercept in RNAStructure
 
@@ -230,7 +230,7 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
     ct_fname = '%s.ct' % filename()
 
     command = []
-    if not pseudoknots:
+    if not pseudo:
         command = command + ['%s/Fold' % LOC, seq_file, ct_fname, '-T', str(T + 273.15)]
     else:
         command = command + ['%s/ShapeKnots' % LOC, seq_file, ct_fname]
