@@ -81,15 +81,31 @@ def mfe(seq, package='vienna_2', T=37,
 
     elif pkg=='eternafold':
         if linear:
-            struct = mfe_linearfold_(seq, package='eternafold')
+            if return_dG_MFE:
+                struct, dG_MFE = mfe_linearfold_(seq, package='eternafold', return_dG_MFE=return_dG_MFE, beam_size=beam_size)
+            else:
+                struct = mfe_linearfold_(seq, package='eternafold', return_dG_MFE=return_dG_MFE)
+
         else:
-            struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=package_locs['eternafoldparams'],viterbi=viterbi)
+
+            if 'eternafoldparams' in package_locs.keys() and 'eternafold' not in package_locs.keys():
+                struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=package_locs['eternafoldparams'],viterbi=viterbi)
+
+            elif 'eternafold' in package_locs.keys():
+                #Using eternafold code and params in eternafold codebase
+                efold_param_file = package_locs['eternafold']+'/../parameters/EternaFoldParams.v1'
+                if not os.path.exists(efold_param_file):
+                    RuntimeError('Error: Parameters not found at %s' % efold_param_file)
+                else:
+                    struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, DIRLOC=package_locs['eternafold'],
+                        param_file=efold_param_file,viterbi=viterbi, probing_signal=probing_signal)
 
     elif pkg=='rnastructure':
         if linear:
             raise ValueError('package %s is not supported with linearfold.' % package)
         else:
             struct = mfe_rnastructure_(seq, version=version, T=T, constraint=constraint, 
+                probing_signal=probing_signal,
                 param_file=param_file, shape_signal=shape_signal, dms_signal=dms_signal, 
                 shape_file=shape_file, dms_file=dms_file, pseudoknots = pseudoknots)
     else:
@@ -171,7 +187,7 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
     else:
         return stdout.decode('utf-8').split('\n')[1].split(' ')[0]
 
-def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None, 
+def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None, probing_signal=None,probing_kws=None,
     shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pseudoknots=False):
     """get minimum free energy structure
         with SHAPE or DMS data, uses the default slope and intercept in RNAStructure
@@ -182,6 +198,10 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
     Returns
         float: MFE structure
     """
+
+    if probing_signal is not None:
+        shape_signal = probing_signal
+
     if param_file is not None:
         raise ValueError('Cannot run RNAstructure with non-default RNA parameters as specified in: %s' % param_file)
     if version is not None:
@@ -284,7 +304,8 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
 
     return mfe_struct
 
-def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,viterbi=False):
+def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,DIRLOC=None,
+    viterbi=False, probing_signal=None, probing_kws=None):
     """get MFE structure for Contrafold
 
     Args:
@@ -297,9 +318,14 @@ def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,vit
     """
     if not version: version='2'
 
-    fname = '%s.in' % filename()
+    if probing_signal is not None:
+        fname = write_reactivity_file_contrafold(probing_signal, seq)
+    else:
+        fname = '%s.in' % filename()
 
-    if version.startswith('2'):
+    if DIRLOC is not None:
+        LOC=DIRLOC
+    elif version.startswith('2'):
         LOC=package_locs['contrafold_2']
     elif version.startswith('1'):
         LOC=package_locs['contrafold_1']
@@ -308,8 +334,14 @@ def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,vit
 
     command = ['%s/contrafold' % LOC, 'predict', fname]
 
-    if param_file is not None:
-        command = command + ['--params', param_file]
+    if probing_signal is not None:
+        command = command + ['--evidence', '--params', package_locs['eternafold']+'/../parameters/EternaFoldParams_PLUS_POTENTIALS.v1', '--numdatasources','1', ]
+        if probing_kws is not None:
+            if 'kappa' in probing_kws.keys():
+                command = command + ['--kappa', str(probing_kws['kappa']) ]
+    else:
+        if param_file is not None:
+            command = command + ['--params', param_file]
 
     if viterbi:
         command.append('--viterbi')
@@ -318,7 +350,8 @@ def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,vit
         convert_dbn_to_contrafold_input(seq, constraint, fname)
         command.append('--constraints')
     else:
-        convert_dbn_to_contrafold_input(seq, ''.join(['.' for x in range(len(seq))]), fname)
+        if probing_signal is None:
+            convert_dbn_to_contrafold_input(seq, ''.join(['.' for x in range(len(seq))]), fname)
 
     if DEBUG: print(' '.join(command))
 
