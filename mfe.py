@@ -15,7 +15,7 @@ def mfe(seq, package='vienna_2', T=37,
     dangles=True, noncanonical=False, beam_size=100,
     bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False,
     probing_signal=None,probing_kws=None, pseudo=False,
-    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False):
+    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False, **kwargs):
 
     ''' Compute MFE structure (within package) for RNA sequence.
     Note: this is distinct from the arnie MEA codebase, which takes any base pair probability matrix and computes the maximum expected accuracy structure.
@@ -77,7 +77,7 @@ def mfe(seq, package='vienna_2', T=37,
                 struct = mfe_linearfold_(seq, package='vienna', return_dG_MFE=return_dG_MFE)
         else:
             struct = mfe_vienna_(seq, version=version, T=T, dangles=dangles, constraint=constraint, motif=motif, param_file=param_file,
-                reweight=reweight, probing_signal=probing_signal)
+                reweight=reweight, probing_signal=probing_signal, **kwargs)
  
     elif pkg=='contrafold':
         if linear:
@@ -107,7 +107,7 @@ def mfe(seq, package='vienna_2', T=37,
                     RuntimeError('Error: Parameters not found at %s' % efold_param_file)
                 else:
                     struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, DIRLOC=package_locs['eternafold'],
-                        param_file=efold_param_file,viterbi=viterbi, probing_signal=probing_signal)
+                        param_file=efold_param_file,viterbi=viterbi, probing_signal=probing_signal, probing_kws=probing_kws)
 
 
     elif pkg=='rnastructure':
@@ -127,7 +127,7 @@ def mfe(seq, package='vienna_2', T=37,
         return struct
 
 def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=None, dangles=True, reweight=None,
-    probing_signal=None, shapeMethod='W', probing_kws=None):
+    probing_signal=None, shapeMethod='W', probing_kws=None, **kwargs):
     """get minimum free energy structure with Vienna
 
     Args:
@@ -165,7 +165,14 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
     if probing_signal is not None:
         if probing_kws is None:
             probing_kws={}
-        probing_file = run_RNAPVmin(probing_signal, seq, LOC, DEBUG, **probing_kws)
+
+        if shapeMethod=='W':
+            probing_file = run_RNAPVmin(probing_signal, seq, LOC, DEBUG, **probing_kws)
+
+        elif shapeMethod=='D' or shapeMethod=='Z':
+            probing_file = write_reactivity_file_RNAstructure(probing_signal)
+            command.append('--shapeConversion=O')
+
         command.append('--shape=%s' % probing_file)
         command.append('--shapeMethod=%s' % shapeMethod)
 
@@ -234,8 +241,8 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
         command = command + ['%s/Fold' % LOC, seq_file, ct_fname, '-T', str(T + 273.15)]
     else:
         command = command + ['%s/ShapeKnots' % LOC, seq_file, ct_fname]
-        if dms_signal is not None:
-            raise ValueError('Cannot run RNAstructure with DMS signal and pseudoknots.')
+        # if dms_signal is not None:
+        #     raise ValueError('Cannot run RNAstructure with DMS signal and pseudoknots.')
         if constraint is not None:
             raise ValueError('Cannot run RNAstructure with constraints and pseudoknots.')
     
