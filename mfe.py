@@ -15,7 +15,7 @@ def mfe(seq, package='vienna_2', T=37,
     dangles=True, noncanonical=False, beam_size=100,
     bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False,
     probing_signal=None,probing_kws=None, pseudo=False,
-    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False, **kwargs):
+    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pseudoknots=False, **kwargs):
 
     ''' Compute MFE structure (within package) for RNA sequence.
     Note: this is distinct from the arnie MEA codebase, which takes any base pair probability matrix and computes the maximum expected accuracy structure.
