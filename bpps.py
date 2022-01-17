@@ -62,7 +62,7 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
     else:
 
         _, tmp_file = pfunc(sequence, package=package, bpps=True, linear=linear,
-            motif=motif, constraint=constraint, T=T, coaxial=coaxial, probing_signal=probing_signal, probing_kws=probing_kws, DIRLOC=package_locs[pkg],
+            motif=motif, constraint=constraint, T=T, coaxial=coaxial, probing_signal=probing_signal, probing_kws=probing_kws, DIRLOC=package_locs[package],
              dangles=dangles, param_file=param_file,reweight=reweight, beam_size=beam_size, DEBUG=DEBUG, threshknot=threshknot)
 
         if linear:
