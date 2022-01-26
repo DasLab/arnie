@@ -14,7 +14,9 @@ def mfe(seq, package='vienna_2', T=37,
     linear=False, return_dG_MFE = False,
     dangles=True, noncanonical=False, beam_size=100,
     bpps=False, param_file=None, coaxial=True, reweight=None,viterbi = False,
-    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False):
+    probing_signal=None,probing_kws=None, pseudo=False,
+    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pseudoknots=False, **kwargs):
+
     ''' Compute MFE structure (within package) for RNA sequence.
     Note: this is distinct from the arnie MEA codebase, which takes any base pair probability matrix and computes the maximum expected accuracy structure.
     That said, Contrafold's default structure prediction is an MEA structure, not MFE.  In this module, calling Contrafold returns the default MEA structure unless the 
@@ -32,7 +34,7 @@ def mfe(seq, package='vienna_2', T=37,
         noncanonical(bool): include noncanonical pairs or not (for contrafold, RNAstructure (Cyclefold))
         shape_signal(list): list of normalized SHAPE reactivities, with negative values indicating no signal
         dms_signal(list): list of normalized DMS reactivities, with negative values indicating no signal
-        pk: if True, will predict pseudoknots, but only with RNAstructure
+        pseudo: if True, will predict pseudoknots
 
         Possible packages: 
         'vienna_2', 'vienna_1','contrafold_1','contrafold_2', 'rnastructure'
@@ -40,6 +42,15 @@ def mfe(seq, package='vienna_2', T=37,
     Returns
         string: MFE structure
     '''
+
+    # TODO: update to be just probing_signal
+    # if shape_signal:
+    #     print('Warning: shape_signal is deprecated, use probing_signal')
+    #     probing_signal = copy(shape_signal)
+
+    # if dms_signal:
+    #     print('Warning: dms_signal is deprecated, use probing_signal')
+    #     probing_signal = copy(dms_signal)
 
     try:
         pkg, version = package.lower().split('_')
@@ -55,6 +66,9 @@ def mfe(seq, package='vienna_2', T=37,
     if linear and pkg not in ['vienna','contrafold','eternafold']:
         print('Warning: LinearFold only implemented for vienna, contrafold, eternafold.')
 
+    if pseudo and not pkg in ['rnastructure', 'nupack']:
+        print('Warning: %s and pseudoknots not supported in Arnie yet' % pkg)
+
     if pkg=='vienna':
         if linear:
             if return_dG_MFE:
@@ -62,7 +76,8 @@ def mfe(seq, package='vienna_2', T=37,
             else:
                 struct = mfe_linearfold_(seq, package='vienna', return_dG_MFE=return_dG_MFE)
         else:
-            struct = mfe_vienna_(seq, version=version, T=T, dangles=dangles, constraint=constraint, motif=motif, param_file=param_file,reweight=reweight)
+            struct = mfe_vienna_(seq, version=version, T=T, dangles=dangles, constraint=constraint, motif=motif, param_file=param_file,
+                reweight=reweight, probing_signal=probing_signal, **kwargs)
  
     elif pkg=='contrafold':
         if linear:
@@ -81,6 +96,7 @@ def mfe(seq, package='vienna_2', T=37,
                 struct = mfe_linearfold_(seq, package='eternafold', return_dG_MFE=return_dG_MFE)
 
         else:
+
             if 'eternafoldparams' in package_locs.keys() and 'eternafold' not in package_locs.keys():
                 struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=package_locs['eternafoldparams'],viterbi=viterbi)
 
@@ -91,15 +107,17 @@ def mfe(seq, package='vienna_2', T=37,
                     RuntimeError('Error: Parameters not found at %s' % efold_param_file)
                 else:
                     struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, DIRLOC=package_locs['eternafold'],
-                        param_file=efold_param_file,viterbi=viterbi)
+                        param_file=efold_param_file,viterbi=viterbi, probing_signal=probing_signal, probing_kws=probing_kws)
+
 
     elif pkg=='rnastructure':
         if linear:
             raise ValueError('package %s is not supported with linearfold.' % package)
         else:
             struct = mfe_rnastructure_(seq, version=version, T=T, constraint=constraint, 
+                probing_signal=probing_signal,
                 param_file=param_file, shape_signal=shape_signal, dms_signal=dms_signal, 
-                shape_file=shape_file, dms_file=dms_file, pk=pk)
+                shape_file=shape_file, dms_file=dms_file, pseudo = pseudo)
     else:
         raise ValueError('package %s not understood.' % package)
 
@@ -108,7 +126,8 @@ def mfe(seq, package='vienna_2', T=37,
     else:
         return struct
 
-def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=None, dangles=True, reweight=None):
+def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=None, dangles=True, reweight=None,
+    probing_signal=None, shapeMethod='W', probing_kws=None, **kwargs):
     """get minimum free energy structure with Vienna
 
     Args:
@@ -126,13 +145,11 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
     if version.startswith('2'):
         LOC=package_locs['vienna_2']
     elif version.startswith('1'):
+
         LOC=package_locs['vienna_1']
+
     else:
         raise RuntimeError('Error, vienna version %s not present' % version)
-
-    command = ['%s/RNAfold' % LOC, '-T', str(T), '-p0'] #p0 doesn't predict bpps, saves time
-    if motif is not None:
-        command.append('--motif="%s"' % motif)
 
     if constraint is not None:
         fname = write([seq, constraint])
@@ -140,6 +157,24 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
         command.append('--enforceConstraint')
     else:
         fname = write([seq])
+
+    command = ['%s/RNAfold' % LOC, '-T', str(T), '-p0'] #p0 doesn't predict bpps, saves time
+    if motif is not None:
+        command.append('--motif="%s"' % motif)
+
+    if probing_signal is not None:
+        if probing_kws is None:
+            probing_kws={}
+
+        if shapeMethod=='W':
+            probing_file = run_RNAPVmin(probing_signal, seq, LOC, DEBUG, **probing_kws)
+
+        elif shapeMethod=='D' or shapeMethod=='Z':
+            probing_file = write_reactivity_file_RNAstructure(probing_signal)
+            command.append('--shapeConversion=O')
+
+        command.append('--shape=%s' % probing_file)
+        command.append('--shapeMethod=%s' % shapeMethod)
 
     if not dangles:
         command.append('--dangles=0')
@@ -165,17 +200,15 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
     if p.returncode:
         raise Exception('RNAfold failed: on %s\n%s' % (seq, stderr))
     os.remove(fname)
-    #os.remove('rna.ps')
+    os.remove('rna.ps')
 
     if 'omitting constraint' in stderr.decode('utf-8'):
         raise ValueError('Constraint caused impossible structure')
     else:
         return stdout.decode('utf-8').split('\n')[1].split(' ')[0]
 
-
-
-def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None, 
-    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pk=False):
+def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None, probing_signal=None,probing_kws=None,
+    shape_signal=None, dms_signal=None, shape_file=None, dms_file=None, pseudo=False):
     """get minimum free energy structure
         with SHAPE or DMS data, uses the default slope and intercept in RNAStructure
 
@@ -185,6 +218,10 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
     Returns
         float: MFE structure
     """
+
+    if probing_signal is not None:
+        shape_signal = probing_signal
+
     if param_file is not None:
         raise ValueError('Cannot run RNAstructure with non-default RNA parameters as specified in: %s' % param_file)
     if version is not None:
@@ -200,12 +237,12 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
     ct_fname = '%s.ct' % filename()
 
     command = []
-    if not pk:
+    if not pseudo:
         command = command + ['%s/Fold' % LOC, seq_file, ct_fname, '-T', str(T + 273.15)]
     else:
         command = command + ['%s/ShapeKnots' % LOC, seq_file, ct_fname]
-        if dms_signal is not None:
-            raise ValueError('Cannot run RNAstructure with DMS signal and pseudoknots.')
+        # if dms_signal is not None:
+        #     raise ValueError('Cannot run RNAstructure with DMS signal and pseudoknots.')
         if constraint is not None:
             raise ValueError('Cannot run RNAstructure with constraints and pseudoknots.')
     
@@ -221,7 +258,7 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
     if dms_signal is not None:
         if len(dms_signal) != len(seq):
             raise RuntimeError('DMS signal used with RNAstructure must have same length as the sequence.')
-        dms_fname = write_reactivity_file(dms_signal)
+        dms_fname = write_reactivity_file_RNAstructure(dms_signal)
         command.extend(['--DMS', dms_fname])
 
     if dms_file is not None:
@@ -230,7 +267,7 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
     if shape_signal is not None:
         if len(shape_signal) != len(seq):
             raise RuntimeError('SHAPE signal used with RNAstructure must have same length as the sequence.')
-        shape_fname = write_reactivity_file(shape_signal)
+        shape_fname = write_reactivity_file_RNAstructure(shape_signal)
         command.extend(['--SHAPE', shape_fname])
 
     if shape_file is not None:
@@ -287,7 +324,8 @@ def mfe_rnastructure_(seq, T=24, version=None, constraint=None, param_file=None,
 
     return mfe_struct
 
-def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,viterbi=False, DIRLOC=None):
+def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,DIRLOC=None,
+    viterbi=False, probing_signal=None, probing_kws=None):
     """get MFE structure for Contrafold
 
     Args:
@@ -300,7 +338,10 @@ def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,vit
     """
     if not version: version='2'
 
-    fname = '%s.in' % filename()
+    if probing_signal is not None:
+        fname = write_reactivity_file_contrafold(probing_signal, seq)
+    else:
+        fname = '%s.in' % filename()
 
     if DIRLOC is not None:
         LOC=DIRLOC
@@ -313,8 +354,14 @@ def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,vit
 
     command = ['%s/contrafold' % LOC, 'predict', fname]
 
-    if param_file is not None:
-        command = command + ['--params', param_file]
+    if probing_signal is not None:
+        command = command + ['--evidence', '--params', package_locs['eternafold']+'/../parameters/EternaFoldParams_PLUS_POTENTIALS.v1', '--numdatasources','1', ]
+        if probing_kws is not None:
+            if 'kappa' in probing_kws.keys():
+                command = command + ['--kappa', str(probing_kws['kappa']) ]
+    else:
+        if param_file is not None:
+            command = command + ['--params', param_file]
 
     if viterbi:
         command.append('--viterbi')
@@ -323,7 +370,8 @@ def mfe_contrafold_(seq, T=37, version='2', constraint=None, param_file=None,vit
         convert_dbn_to_contrafold_input(seq, constraint, fname)
         command.append('--constraints')
     else:
-        convert_dbn_to_contrafold_input(seq, ''.join(['.' for x in range(len(seq))]), fname)
+        if probing_signal is None:
+            convert_dbn_to_contrafold_input(seq, ''.join(['.' for x in range(len(seq))]), fname)
 
     if DEBUG: print(' '.join(command))
 

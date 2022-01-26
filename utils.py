@@ -182,32 +182,30 @@ def convert_dbn_to_RNAstructure_input(seq, constraints, filename):
     bp_list = convert_dotbracket_to_bp_dict(constraints)
 
     SS_list, pairs_list = [], []
-
     for i, (s, c) in enumerate(list(zip(seq, constraints))):
-        if c == 'x':
-            SS_list.append(i + 1)
-        elif c == '.':
-            pass
-        elif c == '(':
-            pairs_list.append([i + 1, bp_list[i] + 1])
-        elif c == ')':
-            pass
-        else:
-            print('Error reading constraint string', c)
+      if c=='x':
+        SS_list.append(i+1)
+      elif c=='.':
+        pass
+      elif c =='(':
+        pairs_list.append([i+1, bp_list[i]+1])
+      elif c ==')':
+        pass
+      else:
+        print('Error reading constraint string', c)
 
     with open('%s' % filename, 'w') as out:
-        out.write('DS:\n-1\n')
-        out.write('SS:\n')
-        for x in SS_list:
-            out.write('%d\n' % x)
-        out.write('-1\n')
-        out.write('Mod:\n-1\n')
-        out.write('Pairs:\n')
-        for x, y in pairs_list:
-            out.write('%d %d\n' % (x, y))
-        out.write('-1 -1')
-        out.write('FMN:\n-1\nForbids:\n-1\n')
-
+      out.write('DS:\n-1\n')
+      out.write('SS:\n')
+      for x in SS_list:
+        out.write('%d\n' % x)
+      out.write('-1\n')
+      out.write('Mod:\n-1\n')
+      out.write('Pairs:\n')
+      for x,y in pairs_list:
+        out.write('%d %d\n' % (x,y))
+      out.write('-1 -1')
+      out.write('FMN:\n-1\nForbids:\n-1\n')
 
 def write_constraint_string(seq, constraint_dbn):
     '''write set of integers to represent constraints, i.e. for use in bpseq format.'''
@@ -528,6 +526,116 @@ def write_reactivity_file(reactivities, fname=None):
                 f.write('%d %f\n' % (i, reactivity))
             i += 1
     return fname
+
+def run_RNAPVmin(probing_signal, seq, LOC, DEBUG, tauSigmaRatio=1, shapeConversion='S'):
+    reac_file = write_reactivity_file_vienna(probing_signal, seq)
+    fname = write([seq])
+    RNApvmin_command = ['%s/RNApvmin' % LOC, reac_file, '--shapeConversion=%s' % shapeConversion, '--tauSigmaRatio=%f' % tauSigmaRatio]
+
+    with open(fname) as f:
+        if DEBUG: print(fname)
+        if DEBUG: print(' '.join(RNApvmin_command))
+        p = sp.Popen(RNApvmin_command, stdin=f, stdout=sp.PIPE, stderr=sp.PIPE)
+    rnapvmin_stdout, rnapvmin_stderr = p.communicate()
+
+    shape_file = filename()
+
+    with open(shape_file,'wb') as f:
+        f.write(rnapvmin_stdout)
+
+    if DEBUG:
+        print('stdout')
+        print(rnapvmin_stdout)
+        print('stderr')
+        print(rnapvmin_stderr)
+
+    if p.returncode:
+        raise Exception('RNApvmin failed: on %s\n%s' % (seq, stderr))
+
+    return shape_file
+
+def write_reactivity_file_RNAstructure(reactivities, fname=None):
+  """ writes reactivities (either SHAPE or DMS) to file format used by RNAstructure
+
+    ex:
+    1 0.120768
+    2 0.190510
+    3 0.155776
+
+  Args:
+    reactivities (list): a list of normalized reactivity float data. 
+    Negative numbers can be used to indicate no signal.
+  """
+
+  if fname is None:
+    fname = '%s.SHAPE' % filename()
+  with open(fname, 'w') as f:
+    i = 1
+    for reactivity in reactivities:
+      if reactivity >= 0:
+        f.write('%d %f\n' % (i, reactivity))
+      i += 1
+  return fname
+
+def write_reactivity_file_vienna(reactivities, sequence, fname=None):
+  '''write reactivity (either SHAPE or DMS) to file format used by ViennaRNA.
+
+    ex:
+    1 U 0.120768
+    2 G 0.190510
+    3 U 0.155776
+
+  Args:
+    reactivities (list): a list of normalized reactivity float data. 
+    sequence: RNA sequence
+    Negative numbers can be used to indicate no signal.
+  '''
+
+  assert len(reactivities) == len(sequence)
+
+  if fname is None:
+    fname = '%s.SHAPE' % filename()
+
+  with open (fname, 'w') as f:
+    i = 1
+    for char, reactivity in list(zip(sequence, reactivities)):
+      if reactivity >= 0:
+        f.write('%d %s %f\n' % (i, char, reactivity))
+
+      i += 1
+  return fname
+
+def write_reactivity_file_contrafold(reactivities, sequence, fname=None):
+  '''write reactivity (either SHAPE or DMS) to file format used by CONTRAfold.
+
+    ex:
+    1 U e1 0.120768
+    2 G e1 0.190510
+    3 U e1 0.155776
+
+  Args:
+    reactivities (list): a list of normalized reactivity float data. 
+    sequence: RNA sequence
+    Negative numbers can be used to indicate no signal.
+  '''
+
+  assert len(reactivities) == len(sequence)
+
+  if fname is None:
+    fname = '%s.bpseq' % filename()
+
+  with open (fname, 'w') as f:
+    i = 1
+    for char, reactivity in list(zip(sequence, reactivities)):
+      if reactivity > 0:
+        f.write('%d %s e1 %.6f\n' % (i, char, reactivity))
+      elif reactivity == 0:
+        f.write('%d %s e1 0.0001\n' % (i, char))
+      else:
+        f.write('%d %s e1 0.0\n' % (i, char))
+
+      i += 1
+  return fname
 
 
 def local_rand_filename(n=6):
