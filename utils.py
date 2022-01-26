@@ -99,17 +99,18 @@ def convert_dotbracket_to_bp_list(s, allow_pseudoknots=False):
     if allow_pseudoknots:
         lefts = ["(", "[", "{", "<"]
         rights = [")", "]", "}", ">"]
+        lower_alphabet = [chr(lower) for lower in range(97,123)]
+        upper_alphabet = [chr(upper) for upper in range(65,91)]
+        lefts.extend(lower_alphabet)
+        rights.extend(upper_alphabet)
     else:
         lefts = ["("]
         rights = [")"]
 
-    char_ignored = []
-    for i, char in enumerate(s):
-        if char not in rights + lefts + ["."]:
-            if char not in char_ignored:
-                char_ignored.append(char)
+    char_ignored = [char for char in s if char not in rights + lefts + ["."]]
+    char_ignored = list(set(char_ignored))
     if char_ignored != []:
-        print("WARNING: characters in structuture,", char_ignored, "ignored!")
+        print("WARNING: characters in structure,", char_ignored, "ignored!")
 
     l = []
     for left, right in zip(lefts, rights):
@@ -137,15 +138,16 @@ def convert_dotbracket_to_bp_dict(s, allow_pseudoknots=False):
     if allow_pseudoknots:
         lefts = ["(", "[", "{", "<"]
         rights = [")", "]", "}", ">"]
+        lower_alphabet = [chr(lower) for lower in range(97,123)]
+        upper_alphabet = [chr(upper) for upper in range(65,91)]
+        lefts.extend(lower_alphabet)
+        rights.extend(upper_alphabet)
     else:
         lefts = ["("]
         rights = [")"]
 
-    char_ignored = []
-    for i, char in enumerate(s):
-        if char not in rights + lefts + ["."]:
-            if char not in char_ignored:
-                char_ignored.append(char)
+    char_ignored = [char for char in s if char not in rights + lefts + ["."]]
+    char_ignored = list(set(char_ignored))
     if char_ignored != []:
         print("WARNING: characters in structuture,", char_ignored, "ignored!")
 
