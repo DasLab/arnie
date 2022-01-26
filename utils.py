@@ -862,3 +862,13 @@ def _seperate_structure_into_PK_involved_or_not(s):
     bp_list_no_pk = groups[0]
     bp_list_pk = [bp for group in groups[1:] for bp in group]
     return {"no_pk_bps": bp_list_no_pk, "pk_bps": bp_list_pk}
+
+
+def evaluate_L1_shape_score(s,shape):
+    # red >0.5, yellow 0.25-0.5, green <0.25
+    score = 0
+    for c,react in zip(s,shape):
+        if (c=="." and react>0.25) or (c!="." and react<0.5):
+            score += 1
+    return score/len(s)
+
