@@ -5,14 +5,14 @@ import numpy as np
 from .utils import *
 from .pfunc import pfunc
 
-DEBUG=False
-
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
 
 def bpps(sequence, package='vienna', constraint=None, pseudo=False,
          T=37, coaxial=True, linear=False, dna=False,
-        motif=None, dangles=True,param_file=None,reweight=None, beam_size=100, DEBUG=False, threshknot=False):
+        motif=None, dangles=True,param_file=None,reweight=None, beam_size=100, DEBUG=False, threshknot=False,
+        probing_signal=None, probing_kws=None):
+
     ''' Compute base pairing probability matrix for RNA sequence.
 
     Args:
@@ -56,12 +56,13 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
 
     if pkg=='nupack':
         return bpps_nupack_(sequence, version = version, dangles = dangles, T = T, pseudo=pseudo, dna=dna)
+
     elif pkg=='vfold':
         return bpps_vfold_(sequence, version = version, T = T, coaxial = coaxial)
     else:
 
         _, tmp_file = pfunc(sequence, package=package, bpps=True, linear=linear,
-            motif=motif, constraint=constraint, T=T, coaxial=coaxial,
+            motif=motif, constraint=constraint, T=T, coaxial=coaxial, probing_signal=probing_signal, probing_kws=probing_kws, DIRLOC=DIRLOC,
              dangles=dangles, param_file=param_file,reweight=reweight, beam_size=beam_size, DEBUG=DEBUG, threshknot=threshknot)
 
         if linear:
@@ -183,7 +184,7 @@ def bpps_nupack_(sequence, version='95', T=37, dangles=True, pseudo=False,dna=Fa
 
     return probs
 
-def bpps_rnastructure_(sequence, tmp_file, coaxial=True):
+def bpps_rnastructure_(sequence, tmp_file, coaxial=True, DEBUG=False):
 
     DIR = package_locs['rnastructure']
 
@@ -218,7 +219,7 @@ def bpps_rnastructure_(sequence, tmp_file, coaxial=True):
     os.remove(pfsfile)
     return probs
 
-def bpps_vfold_(sequence, version='0',T=37, coaxial=True):
+def bpps_vfold_(sequence, version='0',T=37, coaxial=True, DEBUG=False):
     #available versions: 0 for Turner 04 params, 1 for Mfold 2.3 params
 
     DIR = package_locs["vfold"]
