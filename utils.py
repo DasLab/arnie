@@ -83,6 +83,9 @@ def convert_bp_list_to_dotbracket(bp_list, seq_len):
     # all bp that are not intertwined get (), but all others are
     # groups to be nonconflicting and then asigned (), [], {}, <> by group
     chars_set = [("(", ")"), ("(", ")"), ("[", "]"), ("{", "}"), ("<", ">")]
+    alphabet = [(chr(lower),chr(upper)) for upper,lower in zip(list(range(65,91)),list(range(97,123)))]
+    chars_set.extend(alphabet)
+
     if len(groups) > len(chars_set):
         print("WARNING: PK too complex, not enough brackets to represent it.")
 
