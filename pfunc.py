@@ -10,7 +10,7 @@ package_locs = load_package_locations()
 
 def pfunc(seq, package='vienna_2', T=37,
     constraint=None, motif=None, linear=False,
-    dangles=True, noncanonical=False, pseudo=False, dna=False, DIRLOC=None,
+    dangles=True, noncanonical=False, pseudoknots=False, dna=False, DIRLOC=None,
     bpps=False, param_file=None, coaxial=True, reweight=None,
     return_free_energy = False, beam_size=100, DEBUG=False, threshknot=False,
     probing_signal=None, probing_kws = None):
