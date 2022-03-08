@@ -11,7 +11,7 @@ package_locs = load_package_locations()
 def bpps(sequence, package='vienna', constraint=None, pseudo=False,
          T=37, coaxial=True, linear=False, dna=False,
         motif=None, dangles=True,param_file=None,reweight=None, beam_size=100, DEBUG=False, threshknot=False,
-        probing_signal=None, probing_kws=None):
+        probing_signal=None, probing_kws=None,DIRLOC=None):
 
     ''' Compute base pairing probability matrix for RNA sequence.
 
