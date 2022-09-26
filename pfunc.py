@@ -10,7 +10,7 @@ package_locs = load_package_locations()
 
 def pfunc(seq, package='vienna_2', T=37,
     constraint=None, motif=None, linear=False,
-    dangles=True, noncanonical=False, pseudoknots=False, dna=False, DIRLOC=None,
+    dangles=True, noncanonical=False, pseudo=False, dna=False, DIRLOC=None,
     bpps=False, param_file=None, coaxial=True, reweight=None,
     return_free_energy = False, beam_size=100, DEBUG=False, threshknot=False,
     probing_signal=None, probing_kws = None):
@@ -56,7 +56,7 @@ def pfunc(seq, package='vienna_2', T=37,
     #     raise RuntimeError('Error: need to set path to EternaFold params to use eternafold hotkey.')
 
 
-    if pseudoknots and pkg !='nupack':
+    if pseudo and pkg !='nupack':
         raise ValueError('pseudo only for use with nupack')
 
     if threshknot:
