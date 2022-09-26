@@ -56,7 +56,7 @@ def pfunc(seq, package='vienna_2', T=37,
     #     raise RuntimeError('Error: need to set path to EternaFold params to use eternafold hotkey.')
 
 
-    if pseudoknots and pkg !='nupack':
+    if pseudo and pkg !='nupack':
         raise ValueError('pseudo only for use with nupack')
 
     if threshknot:
@@ -395,7 +395,7 @@ def pfunc_nupack_(seq, version='95', T=37, dangles=True, constraint=None, return
         command=['%s/pfunc' % DIR, '%s' % seqfile.replace('.in',''),'-T', str(T),
              '-material', nupack_materials[version], '-dangles', dangle_option]
 
-    if pseudoknots:
+    if pseudo:
         command.append('--pseudo')
     if DEBUG: print(' '.join(command))
     p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
