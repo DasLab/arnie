@@ -210,7 +210,9 @@ rnastructure: /path/to/RNAstructure/exe
 
 ## RNASoft (`package='rnasoft'`)
 
-Download the MultiRNAFold package from [http://www.rnasoft.ca/download.html](http://www.rnasoft.ca/download.html). (Tested for version 2.1, 2018).
+Download the MultiRNAFold package from [http://www.rnasoft.ca/download.html](http://www.rnasoft.ca/download.html).  (Update 2022: Link no longer is functional.)
+
+(Below tested for version 2.1, 2018).
 
 Unzip the MultiRNAfold tarball.
 
