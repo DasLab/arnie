@@ -4,6 +4,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import sys,ast
+from Bio import SeqIO
 
 def evaluate_shapeknots_v_fold(seq,reactivity,chemical_probe="shape",num_bootstrap=100,Pcutoff=0.3):
 
@@ -26,15 +27,15 @@ def evaluate_shapeknots_v_fold(seq,reactivity,chemical_probe="shape",num_bootstr
             shape_signal=reactivity, pk=False)
         _, fold_bpp3 = mfe_bootstrap(seq, num_bootstrap, package='rnastructure', T=37,
             shape_signal=reactivity, pk=False)
-        np.save(seq+"_bpp_shapeknot_1.npy", shapeknots_bpp1)
-        np.save(seq+"_bpp_shapeknot_2.npy", shapeknots_bpp2)
-        np.save(seq+"_bpp_shapeknot_3.npy", shapeknots_bpp3)
-        np.save(seq+"_bpp_shapeknot_4.npy", shapeknots_bpp4)
-        np.save(seq+"_bpp_shapeknot_5.npy", shapeknots_bpp5)
-        np.save(seq+"_bpp_shapeknot_6.npy", shapeknots_bpp6)
-        np.save(seq+"_bpp_fold_1.npy", fold_bpp1)
-        np.save(seq+"_bpp_fold_2.npy", fold_bpp2)
-        np.save(seq+"_bpp_fold_3.npy", fold_bpp3)
+        np.save("bpp_shapeknot_1.npy", shapeknots_bpp1)
+        np.save("bpp_shapeknot_2.npy", shapeknots_bpp2)
+        np.save("bpp_shapeknot_3.npy", shapeknots_bpp3)
+        np.save("bpp_shapeknot_4.npy", shapeknots_bpp4)
+        np.save("bpp_shapeknot_5.npy", shapeknots_bpp5)
+        np.save("bpp_shapeknot_6.npy", shapeknots_bpp6)
+        np.save("bpp_fold_1.npy", fold_bpp1)
+        np.save("bpp_fold_2.npy", fold_bpp2)
+        np.save("bpp_fold_3.npy", fold_bpp3)
         result = evaluate_per_bp_pairwise_mean_diff(seq,[shapeknots_bpp1,shapeknots_bpp2,shapeknots_bpp3,
             shapeknots_bpp4,shapeknots_bpp5,shapeknots_bpp6],[fold_bpp1,fold_bpp2,fold_bpp3],Pcutoff)
 
@@ -57,15 +58,15 @@ def evaluate_shapeknots_v_fold(seq,reactivity,chemical_probe="shape",num_bootstr
             dms_signal=reactivity, pk=False)
         _, fold_bpp3 = mfe_bootstrap(seq, num_bootstrap, package='rnastructure', T=37,
             dms_signal=reactivity, pk=False)
-        np.save(seq+"_bpp_shapeknot_1.npy", shapeknots_bpp1)
-        np.save(seq+"_bpp_shapeknot_2.npy", shapeknots_bpp2)
-        np.save(seq+"_bpp_shapeknot_3.npy", shapeknots_bpp3)
-        np.save(seq+"_bpp_shapeknot_4.npy", shapeknots_bpp4)
-        np.save(seq+"_bpp_shapeknot_5.npy", shapeknots_bpp5)
-        np.save(seq+"_bpp_shapeknot_6.npy", shapeknots_bpp6)
-        np.save(seq+"_bpp_fold_1.npy", fold_bpp1)
-        np.save(seq+"_bpp_fold_2.npy", fold_bpp2)
-        np.save(seq+"_bpp_fold_3.npy", fold_bpp3)
+        np.save("bpp_shapeknot_1.npy", shapeknots_bpp1)
+        np.save("bpp_shapeknot_2.npy", shapeknots_bpp2)
+        np.save("bpp_shapeknot_3.npy", shapeknots_bpp3)
+        np.save("bpp_shapeknot_4.npy", shapeknots_bpp4)
+        np.save("bpp_shapeknot_5.npy", shapeknots_bpp5)
+        np.save("bpp_shapeknot_6.npy", shapeknots_bpp6)
+        np.save("bpp_fold_1.npy", fold_bpp1)
+        np.save("bpp_fold_2.npy", fold_bpp2)
+        np.save("bpp_fold_3.npy", fold_bpp3)
         result = evaluate_per_bp_pairwise_mean_diff(seq,[shapeknots_bpp1,shapeknots_bpp2,shapeknots_bpp3,
             shapeknots_bpp4,shapeknots_bpp5,shapeknots_bpp6],[fold_bpp1,fold_bpp2,fold_bpp3],Pcutoff)
 
@@ -109,11 +110,13 @@ def evaluate_per_bp_pairwise_mean_diff(seq,bppAs_,bppBs_,Pcutoff):
     return results
 
 if __name__=='__main__':
-    seq = sys.argv[1]
+    seq_file = sys.argv[1]
     react_file = sys.argv[2]
     with open(react_file) as f:
-        reactivity = [float(line) for line in f]
+        reactivity  = [float(line) for line in f]
+    for record in SeqIO.parse(seq_file, "fasta"):
+        seq = str(record.seq)
     data = evaluate_shapeknots_v_fold(seq,reactivity,chemical_probe="shape",num_bootstrap=10,Pcutoff=0.3)
     sns.violinplot(x="bp", y="diff",
                 hue="inter/intra", data=data[data.seq==seq])
-    plt.savefig(seq+".png")
+    plt.savefig("results.png")

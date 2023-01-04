@@ -28,7 +28,9 @@ pknots: /path/to/PKNOTS/bin
 spotrna: /path/to/SPOT-RNA
 spotrna_conda_env: /path/to/conda/envs/spotrna/bin
 e2efold: /path/to/e2efold/e2efold_productive
-e2efold_conda_env: path/to/conda/envs/e2efold/bin
+e2efold_conda_env: /path/to/conda/envs/e2efold/bin
+spotrna2: /path/to/SPOT-RNA2
+spotrna2_conda_env: /path/to_conda/envs/spotrna2/bin
 
 #TMP: location for tmp files for packages. Update to where you want your tmp files stored.
 TMP: /tmp

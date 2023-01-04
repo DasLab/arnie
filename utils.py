@@ -664,6 +664,15 @@ def filename(n=6):
     return '%s/%s' % (tmpdir, rand)
 
 
+def get_random_folder(n=6):
+    """ generate randome foldername
+    that does not exist in current folder"""
+    out_folder = ''.join([random.choice(string.ascii_lowercase) for _ in range(n)])
+    while os.path.isdir(out_folder):
+        out_folder = ''.join([random.choice(string.ascii_lowercase) for _ in range(n)])
+    return out_folder
+
+
 def write(lines, fname=None):
     """write lines to file
 
@@ -718,6 +727,8 @@ def load_package_locations(DEBUG=False):
         print("Warning: to run e2efold requires inputting the e2efold conda environment path (e2efold_conda_env) into the ARNIEFILE.")
     if "spotrna" in return_dct and "spotrna_conda_env" not in return_dct:
         print("Warning: to run spotrna requires inputting the rnaspot conda environment path (spotrna_conda_env) into the ARNIEFILE.")
+    if "spotrna2" in return_dct and "spotrna2_conda_env" not in return_dct:
+        print("Warning: to run spotrna2 requires inputting the spotrna2 conda environment path (spotrna2_conda_env) into the ARNIEFILE.")
     # if 'eternafoldparams' not in return_dct.keys():
     #   if 'eternafold' in return_dct.keys():
     #     return_dct['eternafoldparams'] = "%s/../parameters/EternaFoldParams.v1" % return_dct['eternafold']

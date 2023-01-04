@@ -19,26 +19,28 @@ def pk_predict(seq, predictor,
     '''
 
     ipknot options:
-        model one of ["LinearPartition-C","LinearPartition-V","Boltzmann","ViennaRNA","CONTRAfold","NUPACK"]
-        t1 probability threshold level 1 
-        t2 probability threshold level 2
-        refinement, number of times for refinment
+        model: one of ["LinearPartition-C","LinearPartition-V","Boltzmann","ViennaRNA","CONTRAfold","NUPACK"]
+        t1: probability threshold level 1 
+        t2: probability threshold level 2
+        refinement: number of times for refinment
 
     hotknots options:
-        model one of ["CC","RE","DP"]
-        param one of ["parameters_CC06.txt","parameters_CC09.txt","parameters_DP03.txt","parameters_DP09.txt"]
+        model: one of ["CC","RE","DP"]
+        param: one of ["parameters_CC06.txt","parameters_CC09.txt","parameters_DP03.txt","parameters_DP09.txt"]
 
     spotrna options:
-        cpu
+        cpu: number cpu threads
 
     e2efold options:
         ???
 
     '''
-    if predictor not in ["hotknots", "ipknot", "knotty", "spotrna", "e2efold", "pknots"]:
-        raise ValueError('Only hotknots,ipknot,knotty,spotrna,e2efold,pknots implemented.')
+    if predictor not in ["hotknots", "ipknot", "knotty", "spotrna", "e2efold", "pknots","spotrna2"]:
+        raise ValueError('Only hotknots,ipknot,knotty,spotrna,spotrna2,e2efold,pknots implemented.')
     if predictor == "spotrna":
         return _run_spotrna(seq, cpu=cpu)[0]
+    elif predictor == "spotrna2":
+        return _run_spotrna2(seq, cpu=cpu)[0]
     elif predictor == "e2efold":
         return _e2efold(seq)
     elif predictor == "pknots":
@@ -249,7 +251,9 @@ def _ipknot_mfe(seq, model="LinearPartition-C", refinement=1, t1="auto", t2="aut
       -E, --energy              Output with the free energy
     """
     ipknot_location = package_locs["ipknot"]
-    fasta_file = "temp.fasta"
+    out_folder = get_random_folder()
+    mkdir(out_folder)
+    fasta_file = f"{out_folder}/temp.fasta"
     f = open(fasta_file, "w")
     f.write(">seq \n")
     f.write(seq)
@@ -262,6 +266,7 @@ def _ipknot_mfe(seq, model="LinearPartition-C", refinement=1, t1="auto", t2="aut
         return "x"*len(seq)
     output = out.decode().split("\n")
     remove(fasta_file)
+    rmdir(out_folder)
     return output[2]
 
 
@@ -290,10 +295,9 @@ def _run_spotrna(seq, cpu=32):
     '''
     spotrna_location = package_locs["spotrna"]
     spotrna_conda_env = package_locs["spotrna_conda_env"]
-    out_folder = "temp"
-    if not path.isdir(out_folder):
-        mkdir(out_folder)
-    fasta_file = "temp.fasta"
+    out_folder = get_random_folder()
+    mkdir(out_folder)
+    fasta_file = f"{out_folder}/temp.fasta"
     f = open(fasta_file, "w")
     f.write(">seq\n")
     f.write(seq)
@@ -310,10 +314,13 @@ def _run_spotrna(seq, cpu=32):
     remove(out_folder + "/seq.bpseq")
     remove(out_folder + "/seq.prob")
     remove(out_folder + "/seq.ct")
-    rmdir(out_folder)
     remove(fasta_file)
+    rmdir(out_folder)
     return struct, bpp
 
+def _run_spotirna2(seq, cpu=32):
+    # TODO 
+    return None
 
 def _e2efold(seq):
     # only if <600
@@ -348,7 +355,9 @@ def _pknots(seq):
       -s          : shuffle sequences
     '''
     pknots_location = package_locs["pknots"]
-    fasta_file = "temp.fasta"
+    out_folder = get_random_folder()
+    mkdir(out_folder)
+    fasta_file = f"{out_folder}/temp.fasta"
     f = open(fasta_file, "w")
     f.write(">seq \n")
     f.write(seq)
@@ -363,5 +372,6 @@ def _pknots(seq):
         return "x"*len(seq)
     bp_list = ct_to_bp_list(outfile, 4)
     remove(outfile)
+    rmdir(out_folder)
     struct = convert_bp_list_to_dotbracket(bp_list, len(seq))
     return struct

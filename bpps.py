@@ -276,7 +276,7 @@ def bpps_linearpartition_(sequence, tmp_file):
 
     fname = tmp_file
 
-    probs=np.zeros([len(sequence), len(sequence)])
+    probs = np.zeros([len(sequence), len(sequence)])
 
     for line in open(fname,'r').readlines():
         if len(line.strip())>0:
