@@ -2,6 +2,9 @@ from arnie.pk_predictors import pk_predict, pk_predict_from_bpp
 from arnie.utils import prob_to_bpp, load_package_locations
 import numpy as np
 
+# TODO e2efold is stochastic?
+# TODO spotrna2 add in?
+
 samiv_seq = "GGUCAUGAGUGCCAGCGUCAAGCCCCGGCUUGCUGGCCGGCAACCCUCCAACCGCGGUGGGGUGCCCCGGGUGAUGACCAGGUUGAGUAGCCGUGACGGCUACGCGGCAAGCGCGGGUC"
 samiv_struct = "((((....(.((((((....((.[[[[[)).)))))))(((..((((((..{{{{)).)))).)))]]]]]....))))..((((.(((((.......))))).))))....}}}}..."
 
