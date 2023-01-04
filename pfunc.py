@@ -116,7 +116,7 @@ def pfunc(seq, package='vienna_2', T=37,
 
             elif 'eternafold' in package_locs.keys() and param_file is None:
                 #Using eternafold code and params in eternafold codebase
-                efold_param_file = package_locs['eternafold']+'/../parameters/EternaFoldParams.v1'
+                efold_param_file = package_locs['eternafold'].replace('src','parameters')+'/EternaFoldParams.v1'
                 if not os.path.exists(efold_param_file):
                     RuntimeError('Error: Parameters not found at %s' % efold_param_file)
 
