@@ -67,7 +67,9 @@ def mfe_bootstrap(seq, num_bootstrap,
             shape_file=shape_file, dms_file=dms_file, pk=pk)
         bpp_matrix += get_bpp_from_dbn(cur_mfe_struct)
 
-        os.remove(shape_file)
-        os.remove(dms_file)
+        if shape_file is not None:
+            os.remove(shape_file)
+        if dms_file is not None:
+            os.remove(dms_file)
 
     return [mfe_struct, bpp_matrix/num_bootstrap]

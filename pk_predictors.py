@@ -40,7 +40,7 @@ def pk_predict(seq, predictor,
     if predictor == "spotrna":
         return _run_spotrna(seq, cpu=cpu)[0]
     elif predictor == "spotrna2":
-        return _run_spotrna2(seq, cpu=cpu)[0]
+        return _run_spotrna2(seq)[0]
     elif predictor == "e2efold":
         return _e2efold(seq)
     elif predictor == "pknots":
@@ -318,9 +318,34 @@ def _run_spotrna(seq, cpu=32):
     rmdir(out_folder)
     return struct, bpp
 
-def _run_spotirna2(seq, cpu=32):
+def _run_spotrna2(seq):
     # TODO 
-    return None
+    spotrna2_location = package_locs["spotrna2"]
+    out_folder = get_random_folder()
+    mkdir(out_folder)
+    fasta_file = f"{out_folder}/temp.fasta"
+    f = open(fasta_file, "w")
+    f.write(">seq\n")
+    f.write(seq)
+    f.close()
+    command = [f"{spotrna2_location}/run_spotrna2.sh", fasta_file]
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+    out, err = p.communicate()
+    if p.returncode:
+        print('ERROR: spotrna2 failed: on %s\n%s\n%s' % (seq, out.decode(), err.decode()))
+        return "x"*len(seq)
+    bp_list = bpseq_to_bp_list(f"{out_folder}/temp_outputs/temp.bpseq")
+    struct = convert_bp_list_to_dotbracket(bp_list, len(seq))
+    bpp = prob_to_bpp(f"{out_folder}/temp_outputs/temp.prob")
+    for f in os.listdir(f"{out_folder}/temp_outputs"):
+        remove(f)
+    rmdir(f"{out_folder}/temp_outputs")
+    for f in os.listdir(f"{out_folder}/temp_features"):
+        remove(f)
+    rmdir(f"{out_folder}/temp_features")
+    remove(fasta_file)
+    rmdir(out_folder)
+    return struct, bpp
 
 def _e2efold(seq):
     # only if <600
