@@ -387,7 +387,7 @@ def _pknots(seq):
     f.write(">seq \n")
     f.write(seq)
     f.close()
-    outfile = "out.out"
+    outfile = f"{out_folder}/out.out"
     command = [pknots_location + "/pknots", "-k", "-g", fasta_file, outfile]
     p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
     out, err = p.communicate()
