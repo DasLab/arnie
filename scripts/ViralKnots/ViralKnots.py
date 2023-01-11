@@ -45,6 +45,7 @@ def viral_knots(seq_filename, step, window, pk_predictors=[], pk_predict=False, 
         if shapeknots:
             num_tasks += len(seq_windows)+len(shape_data_sets)
         size_job = math.ceil(num_tasks/num_jobs)
+
     if pk_predict:
         if spawn:
             #now formatting to be list separated by spaces for input into ViralKnots_single
@@ -84,7 +85,7 @@ def viral_knots(seq_filename, step, window, pk_predictors=[], pk_predict=False, 
                     dfs.append(prob_df)
 
     if spawn:
-        while (2*num_jobs) > len(os.listdir(temp_folder)):
+        while (2*(len(seq_windows)*len(pk_predictors)+2*(len(seq_windows)*len(shape_data_sets)))) > len(os.listdir(temp_folder)):
             time.sleep(5)
         dfs = combine_struct_files(temp_folder)
         files = os.listdir(temp_folder)
@@ -221,13 +222,13 @@ if __name__=='__main__':
     for package in args.pk_predictors:
         if package == "threshknot":
             if args.linear_partition:
-                assert args.bpp_package in ['vienna', 'contrafold', 'eternafold'], "LinearPartition only implemented for vienna, contrafold, eternafold."
+                assert args.bpp_package in ['vienna_2', 'contrafold_2', 'eternafold','contrafold','vienna'], "LinearPartition only implemented for vienna_2, contrafold_2, eternafold, vienna, contrafold."
                 package_str += f' threshknot with base-pair-probaility matrix from {args.bpp_package} with linear partition,'
             else:
                 package_str += f' threshknot with base-pair-probaility matrix from {args.bpp_package},'
         else:
             package_str += f' {package},'
     print(package_str[:-1])
-
+    
     viral_knots(args.seq_filename, args.step, args.window, args.pk_predictors, args.pk_predict, args.bpp_package, args.shape_data_folder, args.shape_data_sets, args.shapeknots, args.shape_rankings, args.spawn, args.template_sbatch, args.num_jobs, args.linear_partition)
 
