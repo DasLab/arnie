@@ -160,7 +160,7 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
 
     command = ['%s/RNAfold' % LOC, '-T', str(T), '-p0'] #p0 doesn't predict bpps, saves time
     if motif is not None:
-        command.append('--motif="%s"' % motif)
+        command.append('--motif=%s' % motif)
 
     if probing_signal is not None:
         if probing_kws is None:
