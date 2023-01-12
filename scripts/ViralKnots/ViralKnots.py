@@ -85,8 +85,12 @@ def viral_knots(seq_filename, step, window, pk_predictors=[], pk_predict=False, 
                     dfs.append(prob_df)
 
     if spawn:
-        while (2*(len(seq_windows)*len(pk_predictors)+2*(len(seq_windows)*len(shape_data_sets)))) > len(os.listdir(temp_folder)):
-            time.sleep(5)
+        # RCK there won't always be this many jobs spawned so you want the min no?
+        # while (2*(len(seq_windows)*len(pk_predictors)+2*(len(seq_windows)*len(shape_data_sets)))) > len(os.listdir(temp_folder)):
+        # all results are in once there is a sbatch script and output csv written for each job.
+        # The number of jobs run is the user specified, num_jobs, if there were more tasks, but otherwise num_tasks
+        while 2*min(num_tasks,num_jobs) > len(os.listdir(temp_folder)):
+            time.sleep(5) # check every 5 seconds
         dfs = combine_struct_files(temp_folder)
         files = os.listdir(temp_folder)
         for f in files:

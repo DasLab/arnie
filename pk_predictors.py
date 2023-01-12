@@ -352,24 +352,50 @@ def _e2efold(seq):
     # TODO probably plenty of options
     e2efold_location = package_locs["e2efold"]
     e2efold_conda_env = package_locs["e2efold_conda_env"]
-    cur_dir = getcwd()
-    chdir(e2efold_location)
-    command = [f"{e2efold_conda_env}/python", "e2efold_productive_short.py", "-c", "config.json"]
-    input_files = glob.glob("short_seqs/*")
-    for f in input_files:
-        remove(f)
-    output_files = glob.glob("short_cts/*")
-    for f in output_files:
-        remove(f)
-    fasta_file = "short_seqs/temp.seq"
+    out_folder = get_random_folder()
+    mkdir(out_folder)
+    with open(f'{out_folder}/config.json', 'w') as f:
+        f.write('\n'.join(['{',
+                           '        "exp_name": "performance on short sequences (50-600)",',
+                           f'        "test_folder": "{out_folder}/short_seqs",',
+                           f'        "save_folder": "{out_folder}/short_cts",',
+                           '        "gpu": "0",',
+                           '        "u_net_d": 10,',
+                           '        "BATCH_SIZE": 8,',
+                           '        "batch_size_stage_1": 20,',
+                           '        "batch_size_stage_2": 16,',
+                           '        "OUT_STEP": 100,',
+                           '        "LOAD_MODEL": true,',
+                           '        "pp_steps": 20,',
+                           '        "pp_loss": "f1",',
+                           '        "pp_model": "mixed",',
+                           '        "rho_per_position": "matrix",',
+                           '        "data_type": "rnastralign_all_600",',
+                           '        "model_type": "att_simple_fix",',
+                           '        "epoches_first": 50,',
+                           '        "epoches_second": 10,',
+                           '        "epoches_third": 10,',
+                           '        "evaluate_epi": 1,',
+                           '        "evaluate_epi_stage_1": 5,',
+                           '        "step_gamma": 1,',
+                           '        "k": 1,',
+                           '        "test": {',
+                           '                "f1": true,',
+                           '                "accuracy": false,',
+                           '                "energy": false',
+                           '        }',
+                           '}']))
+    mkdir(f'{out_folder}/short_seqs')
+    mkdir(f'{out_folder}/short_cts')
+    command = [f"{e2efold_conda_env}/python", f"{e2efold_location}/e2efold_productive_short.py", "-c", f"{out_folder}/config.json"]
+    fasta_file = f"{out_folder}/short_seqs/temp.seq"
     f = open(fasta_file, "w")
     f.write(seq)
     f.close()
     out, err = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE).communicate()
-    bp_list = ct_to_bp_list("short_cts/temp.seq.ct", 1)
+    bp_list = ct_to_bp_list(f"{out_folder}/short_cts/temp.seq.ct", 1)
     struct = convert_bp_list_to_dotbracket(bp_list, len(seq))
     remove(fasta_file)
-    chdir(cur_dir)
     return struct
 
 
