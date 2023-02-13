@@ -34,9 +34,12 @@ def pk_predict(seq, predictor,
     e2efold options:
         ???
 
+    nupack options:
+        ????
+
     '''
-    if predictor not in ["hotknots", "ipknot", "knotty", "spotrna", "e2efold", "pknots","spotrna2"]:
-        raise ValueError('Only hotknots,ipknot,knotty,spotrna,spotrna2,e2efold,pknots implemented.')
+    if predictor not in ["hotknots", "ipknot", "knotty", "spotrna", "e2efold", "pknots","spotrna2","nupack"]:
+        raise ValueError('Only hotknots,ipknot,knotty,spotrna,spotrna2,e2efold,pknots,nupack implemented.')
     if predictor == "spotrna":
         return _run_spotrna(seq, cpu=cpu)[0]
     elif predictor == "spotrna2":
@@ -61,6 +64,8 @@ def pk_predict(seq, predictor,
         if model not in ["LinearPartition-C", "LinearPartition-V", "Boltzmann", "ViennaRNA", "CONTRAfold", "NUPACK"]:
             raise ValueError('Only LinearPartition-C, LinearPartition-V, Boltzmann, ViennaRNA, CONTRAfold, NUPACK model implemented for ipknot.')
         return _ipknot_mfe(seq, model=model, refinement=refinement, t1=t1, t2=t2)
+    elif predictor == "nupack":
+        return _nupack_mfe_pk(seq)
 
 
 def pk_predict_from_bpp(bpp, heuristic="hungarian", theta=0.3, allowed_buldge_len=0, min_len_helix=1,
@@ -305,6 +310,7 @@ def _run_spotrna(seq, cpu=32):
     command = [f"{spotrna_conda_env}/python3", f"{spotrna_location}/SPOT-RNA.py", "--inputs", fasta_file, "--outputs", out_folder, "--cpu", str(cpu)]
     p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
     out, err = p.communicate()
+    print(seq, out.decode(),err.decode())
     if p.returncode:
         print('ERROR: spotrna failed: on %s\n%s\n%s' % (seq, out.decode(), err.decode()))
         return "x"*len(seq)
@@ -393,6 +399,7 @@ def _e2efold(seq):
     f.write(seq)
     f.close()
     out, err = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE).communicate()
+    print(out,err)
     bp_list = ct_to_bp_list(f"{out_folder}/short_cts/temp.seq.ct", 1)
     struct = convert_bp_list_to_dotbracket(bp_list, len(seq))
     remove(fasta_file)
@@ -426,3 +433,29 @@ def _pknots(seq):
     rmdir(out_folder)
     struct = convert_bp_list_to_dotbracket(bp_list, len(seq))
     return struct
+
+
+def _nupack_mfe_pk(seq):
+    # TODO many nupack options... also why is this not implemented in mfe?
+    nupack_location = package_locs['nupack']
+    out_folder = get_random_folder()
+    mkdir(out_folder)
+    fasta_file = f"{out_folder}/temp"
+    f = open(f'{fasta_file}.in','w')
+    f.write(seq)
+    f.close()
+    struct = None
+    command = [nupack_location+'/mfe', "-pseudo", fasta_file]
+    p = sp.Popen(command, stdout=sp.PIPE, stderr=sp.PIPE)
+    out,err = p.communicate()
+    if p.returncode:
+        print(f'ERROR: nupack mfe pk failed on {seq} {fasta_file} {out.decode} {err.decode}')
+        return 'x'*len(seq)
+    f = open(f'{fasta_file}.mfe')
+    struct = f.readlines()[16][:-1]
+    f.close()
+    remove(f'{fasta_file}.in')
+    remove(f'{fasta_file}.mfe')
+    rmdir(out_folder)
+    return struct
+
