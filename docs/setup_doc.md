@@ -176,7 +176,7 @@ Utilities.cpp:342:17: error: use of undeclared identifier 'mkdtemp'
 ```
 Try adding `#include <unistd.h>` to `Utilities.hpp`.
 
-Check the build by running `./src/contrafold -h`.
+Check the build by running `echo CGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCG > test.fasta && ./contrafold predict test.fasta && rm test.fasta`.
 
 Set in your arnie file:
 
@@ -290,3 +290,101 @@ Last but not least, you'll need to create a directory somewhere where your syste
 #directory to write temp files
 TMP: /tmp
 ```
+
+## Pseudoknot packages
+
+After installing the packages you will add the following to your arnie file:
+
+```
+# for PK predictors
+hotknots: /path/to/HotKnots_v2.0/bin
+ipknot: /path/to/ipknot/build
+knotty: /path/to/Knotty
+pknots: /path/to/PKNOTS/bin
+spotrna: /path/to/SPOT-RNA
+spotrna_conda_env: /path/to/conda/envs/spotrna/bin
+e2efold: /path/to/e2efold/e2efold_productive
+e2efold_conda_env: path/to/conda/envs/e2efold/bin
+```
+
+## HotKnots (`predictor='hotknots'`)
+
+Download the source code of HotKnots 2.0 directly from [http://www.cs.ubc.ca/labs/beta/Software/HotKnots/](http://www.cs.ubc.ca/labs/beta/Software/HotKnots/) and unzip the folder. The files are pre-compiled and so, on most systems, nothing more has to be done. If you need to compile the files type `make` in the HotKnots directory.
+
+Check the build by running `cd hotspot && ./HotKnot -h` in the HotKnots directory.
+
+## ipknot (`predictor='ipknot'`)
+
+The package can be found here [https://github.com/satoken/ipknot](https://github.com/satoken/ipknot).
+
+```
+git clone https://github.com/satoken/ipknot.git
+cd ipknot
+export PKG_CONFIG_PATH=/path/to/vienna/lib/pkgconfig:$PKG_CONFIG_PATH
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make 
+make install
+```
+Check install by running `build/ipknot -h` in the ipknot directory.
+
+## Knotty (`predictor='knotty'`)
+
+The package can be found here [https://github.com/HosnaJabbari/Knotty](https://github.com/HosnaJabbari/Knotty).
+
+```
+git clone https://github.com/HosnaJabbari/Knotty.git
+cd Knotty
+cmake -H. -Bbuild
+cmake --build build
+```
+
+If you have issue compiling it is likely because you have incompatible compiller, see the github repository for compiler specification and change the cmake command to point to the correct compiler, eg `cmake -H. -Bbuild -DCMAKE_CXX_COMPILER=g++`.
+
+To test run `./knotty accccuuuuuuugggg` in the Knotty directory.
+
+## PKNOTS (`predictor='pknots'`)
+
+The package can be found here [https://github.com/EddyRivasLab/PKNOTS](https://github.com/EddyRivasLab/PKNOTS).
+
+```
+git clone https://github.com/EddyRivasLab/PKNOTS.git
+cd PKNOTS
+mkdir lib
+cd lib
+git clone https://github.com/EddyRivasLab/easel.git
+cd easel
+autoconf
+./configure
+make
+cd ../../
+./configure
+make
+make install
+```
+
+To test run `bin/pknots -h` in the PKNOTS directory.
+
+## spotrna (`predictor='spotrna'`)
+
+The package can be found here [https://github.com/jaswindersingh2/SPOT-RNA](https://github.com/jaswindersingh2/SPOT-RNA).
+
+```
+git clone https://github.com/jaswindersingh2/SPOT-RNA.git
+cd SPOT-RNA
+wget 'https://www.dropbox.com/s/dsrcf460nbjqpxa/SPOT-RNA-models.tar.gz' || wget -O SPOT-RNA-models.tar.gz 'https://app.nihaocloud.com/f/fbf3315a91d542c0bdc2/?dl=1'
+tar -xvzf SPOT-RNA-models.tar.gz && rm SPOT-RNA-models.tar.gz
+```
+
+```
+conda create -n spotrna python=3.6
+conda activate spotrna
+conda install tensorflow-gpu==1.14.0 # or if no gpu run:  conda install tensorflow==1.14.0 
+while read p; do conda install --yes $p; done < requirements.txt
+```
+
+To test run `python3 SPOT-RNA.py -h`
+
+To obtain the location of the conda environment type `conda info --envs`. Note you do not have to have the environment active when running the code as long as you correctly list spotrna_conda_env in the arnie file.
+

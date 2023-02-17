@@ -1,0 +1,34 @@
+# paths to local installations of packages.  If package is not installed, leave as None
+# Replace paths below with paths to your installations.
+# NB: .gitignore file ignores *.arnie files. Name it as such if you don't want your local path file 
+# included with your git repo.
+
+# Need work on vfold, hotknots, pknots?
+
+rnastructure: /home/groups/rhiju/rkretsch/M2SEQ/RNAstructure/exe
+rnasoft: /home/groups/rhiju/rkretsch/PK/MultiRNAFold
+contrafold_2: /home/groups/rhiju/rkretsch/PK/contrafold-se/src
+eternafold: /home/groups/rhiju/rkretsch/PK/eternagame-EternaFold-d65ecd41aec23594ab10ddf4f49eb16066405a35/src
+vfold: /home/groups/rhiju/rkretsch/PK/Vfold2D
+
+# for path to a vienna build:
+vienna_2: /home/groups/rhiju/rkretsch/M2SEQ/ViennaRNA-2.4.16/src/bin
+nupack: /home/groups/rhiju/rkretsch/PK/nupack3.0.6/bin
+
+# for linear partition
+linearfold: /home/groups/rhiju/rkretsch/PK/LinearFold/bin
+linearpartition: /home/groups/rhiju/rkretsch/PK/LinearPartition/bin
+
+# for PK predictors
+hotknots: /home/groups/rhiju/rkretsch/PK/HotKnots_v2.0/bin
+ipknot: /home/groups/rhiju/rkretsch/PK/ipknot/build
+knotty: /home/groups/rhiju/rkretsch/PK/Knotty
+pknots: /home/groups/rhiju/rkretsch/PK/PKNOTS/bin
+spotrna: /home/groups/rhiju/rkretsch/PK/SPOT-RNA
+spotrna_conda_env: /home/groups/rhiju/rkretsch/miniconda3/envs/spotrna/bin
+spotrna2: /home/groups/rhiju/rkretsch/PK/SPOT-RNA2
+e2efold: /home/groups/rhiju/rkretsch/PK/e2efold/e2efold_productive
+e2efold_conda_env: /home/groups/rhiju/rkretsch/miniconda3/envs/e2efold/bin
+
+#TMP: location for tmp files for packages. Update to where you want your tmp files stored.
+TMP: /home/groups/rhiju/rkretsch/tmp

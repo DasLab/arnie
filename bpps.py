@@ -60,9 +60,14 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
     elif pkg=='vfold':
         return bpps_vfold_(sequence, version = version, T = T, coaxial = coaxial)
     else:
-
+        if pkg in package_locs:
+            pkg_loc = package_locs[pkg]
+        else:
+            package_locs_base = {x.split("_")[0]:y for x,y in package_locs.items()}
+            pkg_loc = package_locs_base[pkg]
+        
         _, tmp_file = pfunc(sequence, package=package, bpps=True, linear=linear,
-            motif=motif, constraint=constraint, T=T, coaxial=coaxial, probing_signal=probing_signal, probing_kws=probing_kws, DIRLOC=package_locs[package],
+            motif=motif, constraint=constraint, T=T, coaxial=coaxial, probing_signal=probing_signal, probing_kws=probing_kws, DIRLOC=pkg_loc,
              dangles=dangles, param_file=param_file,reweight=reweight, beam_size=beam_size, DEBUG=DEBUG, threshknot=threshknot)
 
         if linear:
@@ -276,7 +281,7 @@ def bpps_linearpartition_(sequence, tmp_file):
 
     fname = tmp_file
 
-    probs=np.zeros([len(sequence), len(sequence)])
+    probs = np.zeros([len(sequence), len(sequence)])
 
     for line in open(fname,'r').readlines():
         if len(line.strip())>0:
