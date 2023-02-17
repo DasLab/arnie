@@ -1,0 +1,89 @@
+Source: https://github.com/gnye8/PK_research/tree/main/ViralKnots
+
+How to use ViralKnots:
+
+##### step 1 is no longer needed if you use ViralKnots already on Sherlock ######
+#    1. First copy ViralKnots.py, ViralKnots_utils.py, ViralKnots_single_shape.py, and ViralKnots_single.py to the desired location on the
+#    cluster using the following command:
+#
+#        scp <viralknots_file> <sunetid>@login.sherlock.stanford.edu:/<path_to_desired_folder>
+#
+#     - note: type this into your terminal in the directory in which the files are located, otherwise you must also include the path to the files
+#
+#     - example of how this command would look:
+#
+#        scp /Users/gracenye/Desktop/PK_research/ViralKnots.py gnye8@login.sherlock.stanford.edu:/scratch/groups/rhiju/gnye8/viralknots
+
+2. Now you must copy the fasta file containing the sequence of the viral genome that you want to run using the same command
+3. Log on to the cluster and navigate to the folder you want to run ViralKnots in
+4. If you wish to run a number of child jobs in parallel, you must create a template_sbatch file to be used by the pipeline to create those jobs. Create the file using the following command:
+
+        nano <sbatch_file_name>
+
+    - This command will take you to an empty file, in which you should write the following:
+
+        #!/bin/bash
+
+        #SBATCH -J viralknots_single
+        #SBATCH -o /<path_to_folder>/single.out
+        #SBATCH -e /<path_to_folder>/single.err
+        #SBATCH -p biochem
+        #SBATCH -t 7:00:00
+        #SBATCH -n 1
+        #SBATCH -N 1
+
+        cd /<folder_to_run_in>
+        module load gcc
+
+
+    - Remember, DO NOT actually write a line with a command here. This will be done by the pipeline.
+    - Now save the file by hitting control+x and then y
+
+5. Now you must create a sbatch file that you will use to submit the job with your desired arguments. Create the file using the following command:
+
+        nano <viralknots_sbatch>
+
+  - Create the file using the following template:
+
+        #!/bin/bash
+
+        #SBATCH -J viralknots #Name of job
+        #SBATCH -o /<path_to_desired_folder>/viralknots.out #file where output is written
+        #SBATCH -e /<path_to_desired_folder>/viralknots.err #file where errors are written
+        #SBATCH -p biochem #partition to run on (you should use biochem for now)
+        #SBATCH -t 2:00:00 #time to run the job
+        #SBATCH -n 1 #number of cpus
+        #SBATCH -N 1 #number of gpus
+
+        cd /scratch/<folder_to_run_in> #go to wherever you want to run the job
+        module load gcc
+
+        python /home/groups/rhiju/rkretsch/PK/arnie/scripts/ViralKnots/ViralKnots.py -s <seq_filename> --step <step> -w <window> --pk_predictors <pk_predictors> --pk_predict True --shapeknots False --shape_data_folder <path_to_folder> --shape_data_sets <list_of_data_sets> --shape_rankings False --bpp_package <bpp_package> --spawn True --template_sbatch <template_sbatch> --temp_folder <temp_folder> --num_jobs <num_jobs>
+
+
+  - the necessary inputs are as follows:
+      - seq_filename: the name and location of the fasta file with the viral sequence
+      - step: the number of nucleotides for the pipeline to slide down before starting the next window
+      - window: the size of the nucleotide window to run predictions over
+      - pk_predictors: a list of names of pk predictors to use; these should be formatted as a list separated by spaces NO COMMAS (e.g.: threshknot spotrna knotty pknots)
+      - pk_predict: a boolean, write True if you want to run pk predictors and False if you only want to run shapeknots
+      - shapeknots: a boolean, write True if you want to run shapeknots and False if you only want to run pk predictors; the default is False
+      - shape_data_folder: default is None; the location of the folder in which you have stored csv's with shape data
+      - shape_data_sets: default is None; your shape data should be in files ending with .csv and the shape_data_sets variable is the names of the files WITHOUT the .csv
+              - note that the format of the shape data in the file should be one reactivity value per line with no commas or any other comments/labels
+      - shape_rankings: a boolean, default is False, whether or not you want to score structures based on agreement with shape data
+      - bpp_package: name of the bpp package you want to use if you are running threshknot; default is contrafold2
+      - spawn: a boolean, default is False, whether or not you want to run a series of child jobs in parallel
+      - template_sbatch: the name and location of the template sbatch file you created in step 4
+      - temp_folder: name and location of the folder for the pipeline to deposit all the temporary child jobs it will spawn; this folder should NOT already exist
+      - num_jobs: the number of child jobs you want to spawn (max is ~1000 per hour on sherlock)
+
+  - now save the file by typing control+x and then y
+
+6. submit the job by running the following command:
+
+          sbatch <viralknots_sbatch>
+
+  - you can check the status of your job on sherlock by running the following:
+
+          squeue -u <sunetid>
