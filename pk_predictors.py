@@ -159,7 +159,7 @@ def _sigmoid(x, slope_factor=0.5):
     return 1 / (1 + np.exp(-x / slope_factor))
 
 
-def _threshknot(bpp, theta=0.3, max_iter=1, allowed_buldge_len=0, min_len_helix=1):
+def _threshknot(bpp, theta=0.3, max_iter=1, allowed_buldge_len=0, min_len_helix=2):
     iteration = 0
     length = bpp.shape[0]
     bp_list = []
