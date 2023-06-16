@@ -181,7 +181,7 @@ def bpps_nupack_(sequence, version='95', T=37, dangles=True, pseudo=False,dna=Fa
                         i, j, p = int(fields[0])-1, int(fields[1])-1, float(fields[2])
                         probs[i,j] = p
                         probs[j,i] = p
-
+    os.remove(ppairs_file)
 
     return probs
 

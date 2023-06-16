@@ -17,3 +17,4 @@ struct = mfe(seq, linear=True, package='contrafold')
 print(struct)
 struct = mfe(seq, linear=True, package='eternafold')
 print(struct)
+

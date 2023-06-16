@@ -8,7 +8,6 @@ def test_bpps(pkg):
     p = bpps(sample_seq, package=pkg)
     print('test bpps %s' % pkg)
     print(p[0])
-    return
 
 
 if __name__ == '__main__':
@@ -21,4 +20,5 @@ if __name__ == '__main__':
         if pkg == 'TMP' or pkg.startswith('linear') or pkg in PK_packages:
             continue
 
-        test_bpps(pkg.lower())
+        test_bpps(pkg)
+

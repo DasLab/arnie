@@ -268,6 +268,8 @@ def _ipknot_mfe(seq, model="LinearPartition-C", refinement=1, t1="auto", t2="aut
     out, err = p.communicate()
     if p.returncode:
         print('ERROR: ipknot failed: on %s\n%s\n%s' % (seq, out.decode(), err.decode()))
+        remove(fasta_file)
+        rmdir(out_folder)
         return "x"*len(seq)
     output = out.decode().split("\n")
     remove(fasta_file)
@@ -406,6 +408,11 @@ def _e2efold(seq):
     bp_list = ct_to_bp_list(f"{out_folder}/short_cts/temp.seq.ct", 1)
     struct = convert_bp_list_to_dotbracket(bp_list, len(seq))
     remove(fasta_file)
+    remove(f"{out_folder}/short_cts/temp.seq.ct")
+    remove(f"{out_folder}/config.json")
+    rmdir(f'{out_folder}/short_seqs')
+    rmdir(f'{out_folder}/short_cts')
+    rmdir(out_folder)
     return struct
 
 

@@ -13,7 +13,6 @@ def test_pfunc(package):
 
 if __name__ == '__main__':
     package_locs = load_package_locations()
-    print(package_locs)
     for pkg in sorted(package_locs.keys()):
 
         if (pkg == 'TMP') or (
@@ -25,3 +24,4 @@ if __name__ == '__main__':
             continue
         print(pkg)
         test_pfunc(pkg.lower())
+

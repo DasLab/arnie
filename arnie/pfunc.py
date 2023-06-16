@@ -311,7 +311,7 @@ def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False,
     if p.returncode:
         raise Exception('Contrafold failed: on %s\n%s' % (seq, stderr))
 
-    #os.remove(fname)
+    os.remove(fname)
 
     if not bpps:
         logZ = float(stdout.decode('utf-8').rstrip().split()[-1])
@@ -465,10 +465,12 @@ def pfunc_rnastructure_(seq, version=None, T=37, constraint=None, coaxial=True,
         print('stderr')
         print(stderr)
 
+    os.remove(seqfile)
+    if constraint is not None:
+        os.remove(fname)
+    
     if p.returncode:
         raise Exception('RNAstructure partition failed: on %s\n%s' % (seq, stderr))
-
-    os.remove(seqfile)
 
     if not bpps:
         command = ['%s/EnsembleEnergy' % DIR, pfsfile]
