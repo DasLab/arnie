@@ -4,6 +4,7 @@ from .mfe import mfe
 from .utils import get_bpp_from_dbn
 from .utils import filename
 from .utils import load_package_locations
+from os import remove
 
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
