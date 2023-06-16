@@ -70,7 +70,7 @@ def mfe_bootstrap(seq, num_bootstrap,
         bpp_matrix += get_bpp_from_dbn(cur_mfe_struct)
 
         if shape_signal is not None:
-            os.remove(shape_file)
+            remove(shape_file)
         if dms_signal is not None:
             os.remove(dms_file)
 
