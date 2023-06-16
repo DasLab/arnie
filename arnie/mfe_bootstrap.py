@@ -4,6 +4,7 @@ from .mfe import mfe
 from .utils import get_bpp_from_dbn
 from .utils import filename
 from .utils import load_package_locations
+from os import remove
 
 # load package locations from yaml file, watch! global dict
 package_locs = load_package_locations()
@@ -27,7 +28,7 @@ def get_bootstrap_reac_file(reactivity):
 
 def mfe_bootstrap(seq, num_bootstrap, 
     package='rnastructure', T=37,
-    constraint=None, shape_signal=None, dms_signal=None, pk=False):
+    constraint=None, shape_signal=None, dms_signal=None, pseudo=False):
     """
     Compute MFE structure (within package) for RNA sequence with bootstrapping on the SHAPE/DMS data.
 
@@ -37,7 +38,7 @@ def mfe_bootstrap(seq, num_bootstrap,
         constraint (str): structure constraints
         shape_signal(list): list of normalized SHAPE reactivities, with negative values indicating no signal
         dms_signal(list): list of normalized DMS reactivities, with negative values indicating no signal
-        pk: if True, will predict pseudoknots, but only with RNAstructure
+        pseudo: if True, will predict pseudoknots, but only with RNAstructure
 
         Possible packages: 
         'rnastructure'
@@ -54,7 +55,7 @@ def mfe_bootstrap(seq, num_bootstrap,
     bpp_matrix = np.zeros((len(seq), len(seq)))
 
     mfe_struct = mfe(seq, package=package, T=T, constraint=constraint, 
-        shape_signal=shape_signal, dms_signal=dms_signal)
+        shape_signal=shape_signal, dms_signal=dms_signal, pseudo=pseudo)
 
     for bootstrap in range(num_bootstrap):
         shape_file = None
@@ -66,7 +67,12 @@ def mfe_bootstrap(seq, num_bootstrap,
             dms_file = get_bootstrap_reac_file(dms_signal)
 
         cur_mfe_struct = mfe(seq, package=package, T=T, constraint=constraint, 
-            shape_file=shape_file, dms_file=dms_file, pk=pk)
+            shape_file=shape_file, dms_file=dms_file, pseudo=pseudo)
         bpp_matrix += get_bpp_from_dbn(cur_mfe_struct)
+
+        if shape_signal is not None:
+            remove(shape_file)
+        if dms_signal is not None:
+            remove(dms_file)
 
     return [mfe_struct, bpp_matrix/num_bootstrap]
