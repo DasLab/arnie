@@ -51,7 +51,7 @@ def run_RNAPVmin(probing_signal, seq, LOC, DEBUG, tauSigmaRatio=1, shapeConversi
 def convert_dbn_to_RNAstructure_input(seq, constraints, filename):
     assert(len(seq) == len(constraints))
 
-    bp_list = convert_dotbracket_to_bp_list(constraints)
+    bp_list = convert_dotbracket_to_bp_dict(constraints)
 
     SS_list, pairs_list = [], []
 
@@ -890,7 +890,7 @@ def write_constraint_string(seq, constraint_dbn):
 
     assert(len(seq) == len(constraint_dbn))
 
-    bp_list = convert_dotbracket_to_bp_list(constraint_dbn)
+    bp_list = convert_dotbracket_to_bp_dict(constraint_dbn)
 
     constraint_list = []
 
