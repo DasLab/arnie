@@ -159,6 +159,17 @@ def local_rand_filename(n=6):
     return rand
 
 
+def get_random_folder(n=6):
+    """ generate randome foldername
+    that does not exist in current folder"""
+    out_folder = ''.join([random.choice(string.ascii_lowercase) for _ in range(n)])
+    while os.path.isdir(out_folder):
+        out_folder = ''.join([random.choice(string.ascii_lowercase) for _ in range(n)])
+    tmpdir = load_package_locations()['TMP']
+    out_folder = f'{tmpdir}/{out_folder}'
+    return out_folder
+
+
 def filename(n=6):
     """generate random filename
 
@@ -232,6 +243,7 @@ def prob_to_bpp(prob_file):
     ''' read a .prob file and return a bpp
     '''
     return np.loadtxt(prob_file)
+
 
 ###############################################################################
 # Package handeling

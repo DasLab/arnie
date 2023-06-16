@@ -7,14 +7,29 @@ rnastructure: /path/to/RNAstructure/exe
 rnasoft: /path/to/MultiRNAFold
 contrafold_2: /path/to/contrafold-se/src
 eternafold: /path/to/eternafold/src/
+vfold: /path/to/Vfold2D
+nupack: /path/to/nupack3.2.2/build/bin
 
 # for a Mac installed binary:
 vienna_2: /usr/local/bin
-
 # for path to a vienna build:
 vienna_2: /path/to/ViennaRNA-2.4.10/src/bin
 vienna_1: /path/to/ViennaRNA-1.8.5/bin
-nupack: /path/to/nupack3.2.2/build/bin
+
+# for linear partition
+linearfold: /path/to/LinearFold/bin
+linearpartition: /path/to/LinearPartition/bin
+
+# for PK predictors
+hotknots: /path/to/HotKnots_v2.0/bin
+ipknot: /path/to/ipknot/build
+knotty: /path/to/Knotty
+pknots: /path/to/PKNOTS/bin
+spotrna: /path/to/SPOT-RNA
+spotrna_conda_env: /path/to/miniconda3/envs/spotrna/bin
+spotrna2: /path/to/SPOT-RNA2
+e2efold: /path/to/e2efold/e2efold_productive
+e2efold_conda_env: /path/to/miniconda3/envs/e2efold/bin
 
 #TMP: location for tmp files for packages. Update to where you want your tmp files stored.
 TMP: /tmp
