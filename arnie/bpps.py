@@ -36,8 +36,9 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
     Returns
     array: NxN matrix of base pair probabilities
   '''
+    package = package.lower()
     try:
-        pkg, version = package.lower().split('_')
+        pkg, version = package.split('_')
     except:
         pkg, version = package, None
 
@@ -70,15 +71,15 @@ def bpps(sequence, package='vienna', constraint=None, pseudo=False,
             return bpps_linearpartition_(sequence, tmp_file)
         else:
 
-            if 'contrafold' in package:
+            if 'contrafold' in pkg:
                 return bpps_contrafold_(sequence, tmp_file)
             if package=='eternafold':
                 return bpps_contrafold_(sequence, tmp_file)
-            elif 'vienna' in package:
+            elif 'vienna' in pkg:
                 return bpps_vienna_(sequence, tmp_file)
-            elif 'rnasoft' in package:
+            elif 'rnasoft' in pkg:
                 return bpps_rnasoft_(sequence, tmp_file)
-            elif 'rnastructure' in package:
+            elif 'rnastructure' in pkg:
                 return bpps_rnastructure_(sequence, tmp_file, coaxial=coaxial)
 
             else:
