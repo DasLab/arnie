@@ -106,7 +106,7 @@ def pk_predict_from_bpp(bpp, heuristic="hungarian", theta=None, allowed_buldge_l
 
 
 def _hungarian(bpp, exp=1, sigmoid_slope_factor=None, prob_to_0_threshold_prior=0,
-               prob_to_1_threshold_prior=1, theta=0, ln=False, add_p_unpaired=False,
+               prob_to_1_threshold_prior=1, theta=0, ln=False, add_p_unpaired=True,
                allowed_buldge_len=0, min_len_helix=2):
 
     bpp_orig = bpp.copy()
