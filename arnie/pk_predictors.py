@@ -68,7 +68,7 @@ def pk_predict(seq, predictor,
         return _nupack_mfe_pk(seq)
 
 
-def pk_predict_from_bpp(bpp, heuristic="hungarian", theta=0.3, allowed_buldge_len=0, min_len_helix=1,
+def pk_predict_from_bpp(bpp, heuristic="hungarian", theta=None, allowed_buldge_len=0, min_len_helix=1,
                         exp=1, sigmoid_slope_factor=None, prob_to_0_threshold_prior=0, prob_to_1_threshold_prior=1, ln=False, add_p_unpaired=True,
                         max_iter=1):
     '''
@@ -94,8 +94,12 @@ def pk_predict_from_bpp(bpp, heuristic="hungarian", theta=0.3, allowed_buldge_le
         raise ValueError('Only threshknot and hunagrian heuristics implemented.')
 
     if heuristic == "threshknot":
+        if theta is None:
+            theta = 0.3
         return _threshknot(bpp, theta=theta, max_iter=max_iter, allowed_buldge_len=allowed_buldge_len, min_len_helix=min_len_helix)[0]
     elif heuristic == "hungarian":
+        if theta is None:
+            theta = 0.0
         return _hungarian(bpp, exp=1, sigmoid_slope_factor=sigmoid_slope_factor, prob_to_0_threshold_prior=prob_to_0_threshold_prior,
                           prob_to_1_threshold_prior=prob_to_1_threshold_prior, theta=theta, ln=ln, add_p_unpaired=add_p_unpaired,
                           allowed_buldge_len=allowed_buldge_len, min_len_helix=min_len_helix)[0]
