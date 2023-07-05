@@ -68,7 +68,7 @@ def pk_predict(seq, predictor,
         return _nupack_mfe_pk(seq)
 
 
-def pk_predict_from_bpp(bpp, heuristic="hungarian", theta=None, allowed_buldge_len=0, min_len_helix=1,
+def pk_predict_from_bpp(bpp, heuristic="hungarian", theta=None, allowed_buldge_len=0, min_len_helix=2,
                         exp=1, sigmoid_slope_factor=None, prob_to_0_threshold_prior=0, prob_to_1_threshold_prior=1, ln=False, add_p_unpaired=True,
                         max_iter=1):
     '''
@@ -107,7 +107,7 @@ def pk_predict_from_bpp(bpp, heuristic="hungarian", theta=None, allowed_buldge_l
 
 def _hungarian(bpp, exp=1, sigmoid_slope_factor=None, prob_to_0_threshold_prior=0,
                prob_to_1_threshold_prior=1, theta=0, ln=False, add_p_unpaired=False,
-               allowed_buldge_len=0, min_len_helix=1):
+               allowed_buldge_len=0, min_len_helix=2):
 
     bpp_orig = bpp.copy()
 
@@ -163,7 +163,7 @@ def _sigmoid(x, slope_factor=0.5):
     return 1 / (1 + np.exp(-x / slope_factor))
 
 
-def _threshknot(bpp, theta=0.3, max_iter=1, allowed_buldge_len=0, min_len_helix=1):
+def _threshknot(bpp, theta=0.3, max_iter=1, allowed_buldge_len=0, min_len_helix=2):
     iteration = 0
     length = bpp.shape[0]
     bp_list = []
