@@ -424,6 +424,8 @@ def mfe_linearfold_(seq, bpps=False, package='contrafold', beam_size=100, return
     # linearfold returns two different things depending on which package
     struct = stdout.decode('utf-8').split('\n')[1].split(' ')[0]
 
+    os.remove(seqfile)
+
     if return_dG_MFE:
 
         dG_mfe = float(stdout.decode('utf-8').split('\n')[1].split(' ')[1][1:-1])
