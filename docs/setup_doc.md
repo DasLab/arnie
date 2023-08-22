@@ -138,6 +138,7 @@ Then set in the arnie file:
 ```
 # Vienna RNAfold 2 Linux build from source:
 vienna_2: /path/to/ViennaRNA-2.4.14/src/bin
+vienna: /path/to/ViennaRNA-2.4.14/src/bin
 ```
 
 ## NUPACK (`package='nupack'`)
