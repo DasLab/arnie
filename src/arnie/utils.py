@@ -292,7 +292,6 @@ def load_package_locations(DEBUG=False):
     package_path = os.path.dirname(arnie.__file__)
 
     if DEBUG:
-        print('Reading Arnie file at %s' % os.environ['ARNIEFILE'])
         print(supported_packages)
 
     # Read from environment variables
@@ -304,17 +303,24 @@ def load_package_locations(DEBUG=False):
         path = os.environ.get(envVar)
         if path:
             return_dct[package] = path
+            if DEBUG:
+                print(f'{package}: {path}')
 
     # Read from Arnie file as last resort
-    with open("%s" % os.environ["ARNIEFILE"], 'r') as f:
-        for line in f.readlines():
-            if line.strip():
-                if not line.startswith('#'):
-                    key, string = line.split(':')
-                    string = string.strip()
-                    if key not in return_dct:
-                        return_dct[key] = string
+    if os.environ.get("ARNIEFILE"):
+        if DEBUG:
+            print('Reading Arnie file at %s' % os.environ['ARNIEFILE'])
+        with open("%s" % os.environ["ARNIEFILE"], 'r') as f:
+            for line in f.readlines():
+                if line.strip():
+                    if not line.startswith('#'):
+                        key, string = line.split(':')
+                        string = string.strip()
+                        if key not in return_dct:
+                            return_dct[key] = string
 
+    if not return_dct:
+        raise EnvironmentError("No prediction packages found in your environment. Check your environment variables or your ARNIEFILE.")
     return return_dct
 
 
