@@ -19,5 +19,9 @@ classifiers = [
 "Bug Tracker" = "https://github.com/DasLab/arnie/issues"
 
 [build-system]
-requires = ["hatchling"]
+requires = [
+  "hatchling", 
+  "numpy",
+  "scipy"
+]
 build-backend = "hatchling.build"
