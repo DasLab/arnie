@@ -101,10 +101,11 @@ def mfe(seq, package='vienna_2', T=37,
                 struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, param_file=package_locs['eternafoldparams'],viterbi=viterbi)
 
             elif 'eternafold' in package_locs.keys():
-                #Using eternafold code and params in eternafold codebase
-                efold_param_file = package_locs['eternafold']+'/../parameters/EternaFoldParams.v1'
+                
+                # Using eternafold code and params in eternafold codebase
+                efold_param_file = os.environ['ETERNAFOLD_PARAMETERS'] if os.environ.get('ETERNAFOLD_PARAMETERS') else package_locs['eternafold']+'/../parameters/EternaFoldParams.v1'
                 if not os.path.exists(efold_param_file):
-                    RuntimeError('Error: Parameters not found at %s' % efold_param_file)
+                    raise RuntimeError('Error: Parameters not found at %s' % efold_param_file)
                 else:
                     struct = mfe_contrafold_(seq, version=version, T=T, constraint=constraint, DIRLOC=package_locs['eternafold'],
                         param_file=efold_param_file,viterbi=viterbi, probing_signal=probing_signal, probing_kws=probing_kws)
