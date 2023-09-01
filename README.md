@@ -67,11 +67,11 @@ my_sequence = 'CGCUGUCUGUACUUGUAUCAGUACACUGACGAGUCCCUAAAGGACGAAACAGCG'
 for pkg in ['vienna','nupack','RNAstructure','contrafold','RNAsoft']:
     bpps_dict[pkg] = bpps(my_sequence, package=pkg)
 ```
-![](assets/example_base_pair_matrices.png)
+![](docs/assets/example_base_pair_matrices.png)
 
 Can also analyze as average base pairing per nucleotide:
 
-![](assets/example_avg_bp_per_nucleotide.png)
+![](docs/assets/example_avg_bp_per_nucleotide.png)
 
 
 ## References
