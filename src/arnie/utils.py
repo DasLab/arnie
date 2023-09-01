@@ -246,9 +246,25 @@ def prob_to_bpp(prob_file):
 
 
 ###############################################################################
-# Package handeling
+# Package handling
 ###############################################################################
 
+supported_packages = [
+    "contrafold",
+    "eternafold",
+    "nupack",
+    "RNAstructure",
+    "RNAsoft",
+    "vienna"
+    # PK Predictors
+    "e2efold",
+    "hotknots", 
+    "ipknot", 
+    "knotty", 
+    "pknots",
+    "spotrna",
+    "spotrna2",
+]
 
 def print_path_files():
     package_dct = load_package_locations()
@@ -271,24 +287,33 @@ def package_list():
 
 
 def load_package_locations(DEBUG=False):
-    '''Read in user-supplied file to specify paths to RNA folding packages. Specify this in your ~/.bashrc as $ARNIEFILE'''
+    '''Set up  paths to RNA folding packages. Checks environment variables or a user-supplied file. If using the file, specify this in your ~/.bashrc as $ARNIEFILE'''
     return_dct = {}
     package_path = os.path.dirname(arnie.__file__)
 
     if DEBUG:
         print('Reading Arnie file at %s' % os.environ['ARNIEFILE'])
+        print(supported_packages)
 
+    # Read from environment variables
+    for package in supported_packages:
+        envVar = f"{package.upper()}_PATH"
+        # Nupack installation sets its own environment variables
+        if package == "nupack":
+            envVar = f"{package.upper()}HOME"
+        path = os.environ.get(envVar)
+        if path:
+            return_dct[package] = path
+
+    # Read from Arnie file as last resort
     with open("%s" % os.environ["ARNIEFILE"], 'r') as f:
         for line in f.readlines():
             if line.strip():
                 if not line.startswith('#'):
                     key, string = line.split(':')
                     string = string.strip()
-                    return_dct[key] = string
-
-    # if 'eternafoldparams' not in return_dct.keys():
-    #   if 'eternafold' in return_dct.keys():
-    #     return_dct['eternafoldparams'] = "%s/../parameters/EternaFoldParams.v1" % return_dct['eternafold']
+                    if key not in return_dct:
+                        return_dct[key] = string
 
     return return_dct
 
