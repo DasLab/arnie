@@ -116,10 +116,9 @@ def pfunc(seq, package='vienna_2', T=37,
 
             elif 'eternafold' in package_locs.keys() and param_file is None:
                 #Using eternafold code and params in eternafold codebase
-                efold_param_file = package_locs['eternafold'].replace('src','parameters')+'/EternaFoldParams.v1'
+                efold_param_file = os.environ['ETERNAFOLD_PARAMETERS'] if os.environ.get('ETERNAFOLD_PARAMETERS') else package_locs['eternafold']+'/../parameters/EternaFoldParams.v1'
                 if not os.path.exists(efold_param_file):
-                    RuntimeError('Error: Parameters not found at %s' % efold_param_file)
-
+                   raise RuntimeError('Error: Parameters not found at %s' % efold_param_file)
                 else:
                     Z, tmp_file = pfunc_contrafold_(seq, T=T, constraint=constraint, 
                         bpps=bpps, param_file=efold_param_file, DIRLOC= package_locs['eternafold'], return_free_energy=return_free_energy, DEBUG=DEBUG)
