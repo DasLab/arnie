@@ -271,7 +271,10 @@ def pfunc_contrafold_(seq, T=37, version='2', constraint=None, bpps=False,
     else:
         raise RuntimeError('Error, Contrafold version %s not present' % version)
 
-    command = ['%s/contrafold' % LOC, 'predict', fname]
+    if not os.path.isdir(LOC):
+        command = ['%s' % LOC, 'predict', fname]
+    else:
+        command = ['%s/contrafold' % LOC, 'predict', fname]
 
     if probing_signal is not None:
         command = command + ['--evidence', '--params', package_locs['eternafoldparams_PLUS_POTENTIALS'], '--numdatasources','1', ]

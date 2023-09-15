@@ -265,8 +265,8 @@ def bpps_vfold_(sequence, version='0',T=37, coaxial=True, DEBUG=False):
     p_ij_output = np.loadtxt(outfile,usecols=(0,2,3)) #col 0: set of inds 1, col 1: set of inds 2, col 2: bpp
 
     for i,j,p in p_ij_output:
-    	probs[int(i-1),int(j-1)] = p
-    	probs[int(j-1),int(i-1)] = p
+        probs[int(i-1),int(j-1)] = p
+        probs[int(j-1),int(i-1)] = p
     os.remove(outfile)
 
     return probs
