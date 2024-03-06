@@ -771,9 +771,9 @@ def _group_into_non_conflicting_bp(bp_list):
                         to_remove.append(bpB)
         group = [bp for bp in max_group if bp not in to_remove]
         groups.append(group)
-        non_redudant_bp_list = current_bp_conflicts
-        conflict_list = [conflict for conflict in conflict_list if conflict[0]
-                         not in group and conflict[1] not in group]
+        # remove group from list
+        non_redudant_bp_list = [bp for bp in non_redudant_bp_list if bp not in group] # current_bp_conflicts
+        # conflict_list = [conflict for conflict in conflict_list if conflict[0] not in group and conflict[1] not in group]
     return groups
 
 
