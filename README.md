@@ -35,6 +35,11 @@ Hannah Wayment-Steele
 
 `RNAGraph`: DEPRECATED, see https://github.com/DasLab/RiboGraphViz/ for current version of the code. Code to process and visualize secondary structures as graph objects.
 
+## Install:
+`arnie` is [available on PyPI](https://pypi.org/projectarnie/).
+
+`pip install arnie`
+
 ## Setup:
 
 1. To use Arnie, you will create a file that contains the paths to the software packages that Arnie is wrapping. See [`docs/setup_doc.md`](docs/setup_doc.md) for installation instructions and troubleshooting tips, as well as instructions for setting up the arnie file.
