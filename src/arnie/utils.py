@@ -255,7 +255,8 @@ supported_packages = [
     "nupack",
     "RNAstructure",
     "RNAsoft",
-    "vienna",
+    "vienna_2",
+    "vienna_1",
     # PK Predictors
     "e2efold",
     "hotknots", 
