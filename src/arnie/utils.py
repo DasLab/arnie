@@ -340,44 +340,113 @@ def load_package_locations(DEBUG=False):
 ###############################################################################
 # Structure representation conversion
 ###############################################################################
-
 def convert_dotbracket_to_bp_list(s, allow_pseudoknots=False):
+    bp_list = []
+    lower_alphabet = [chr(lower) for lower in range(97, 123)]
+    upper_alphabet = [chr(upper) for upper in range(65, 91)]
+
     if allow_pseudoknots:
-        lefts = ["(", "[", "{", "<"]
-        rights = [")", "]", "}", ">"]
-        lower_alphabet = [chr(lower) for lower in range(97, 123)]
-        upper_alphabet = [chr(upper) for upper in range(65, 91)]
-        lefts.extend(lower_alphabet)
-        rights.extend(upper_alphabet)
+        openDelimiterMap = {
+            '(': [],
+            '[': [],
+            '{': [],
+            '<': []
+        }
+
+        # Both the left and right delimiter of each pair of characters point to the same
+        # array, so that when we encounter a left character we push an opening-half pair index,
+        # and when we encounter a right character we can pop off the most recent one.
+        closeDelimiterMap = {
+            ')': openDelimiterMap['('],
+            ']': openDelimiterMap['['],
+            '}': openDelimiterMap['{'],
+            '>': openDelimiterMap['<']
+        }
+
+        flipped = None
+        for (i, char) in enumerate(s):
+            if char == '.':
+                # Unpaired base
+                continue
+            elif (char in openDelimiterMap.keys()):
+                # This is an opening delimiter which we've already registered
+                openDelimiterMap[char].append(i)
+            elif (char in closeDelimiterMap.keys()):
+                # This is a closing delimiter which we've already registered               
+                partner = closeDelimiterMap[char].pop() if closeDelimiterMap[char] else None
+                if (partner == None):
+                    raise Exception(f"Unbalanced parenthesis notation: found closing character '{char}'");
+                bp_list.append([partner, i])
+            elif (
+                ((flipped == None or flipped == False) and char.islower())
+                or ((flipped == None or flipped == True) and char.isupper())
+            ):
+                # For performance, we don't initialize our pair stacks with alpha characters.
+                # Also, we don't know whether lower/upper case characters are considered left or right
+                # delimiters until we encounter one for the first time. Whichever we see first
+                # we treat as a left delimiter, then whenever we encounter a new letter, it has
+                # to follow the same standard.
+                if (flipped == None):
+                    flipped = char.isupper()
+
+                pairStack = []
+                openDelimiterMap[char] = pairStack 
+                closeDelimiterMap[char.lower() if flipped else char.upper()] = pairStack
+                pairStack.append(i)
+            elif (char.isalpha()):
+                # We haven't encountered this character yet, but the case that showed up
+                # we have designated as a right delimiter
+                raise Exception(f"Unbalanced parenthesis notation: found closing character '{char}'")
+            else:
+                print(f"WARNING: characters in structure, '{char}' ignored!")
+                continue
+        for (char, pairStack) in openDelimiterMap.items():
+            if (len(pairStack)): raise Exception(f"Unbalanced parenthesis notation: found unclosed pair for character '{char}'");
     else:
-        lefts = ["("]
-        rights = [")"]
+        pairStack = []
+        openDelimiters = ['(','[','{','<']
+        closeDelimiters = [')',']','}','>']
+        activeOpenDelimiter = None
+        activeCloseDelimiter = None
 
-    char_ignored = [char for char in s if char not in rights + lefts + ["."]]
-    char_ignored = list(set(char_ignored))
-    if char_ignored != []:
-        print("WARNING: characters in structure,", char_ignored, "ignored!")
+        for (i, char) in enumerate(s):
+            if char == '.':
+                # Unpaired
+                continue
+            elif char in openDelimiters:
+                # This is an opening delimiter
+                # If we haven't picked the delimiter we're parsing with yet, set it
+                # If we have picked a delimiter, and this is a different one, error (probably intended to be pk)
+                if (activeOpenDelimiter == None):
+                    activeOpenDelimiter = char
+                    if char == '(': activeCloseDelimiter = ')'
+                    if char == '[': activeCloseDelimiter = ']'
+                    if char == '{': activeCloseDelimiter = '}'
+                    if char == '<': activeCloseDelimiter = '>'
+                if (char in openDelimiters and char != activeOpenDelimiter):
+                    raise Exception(f"Mixed pair delimiters found: '{char}' and '{activeOpenDelimiter}'; did you mean to pass allow_pseudoknots=True?")
+                pairStack.append(i)
+            elif char == activeCloseDelimiter:
+                # This is the closing delimiter matching the chosen opening delimiter
+                partner = pairStack.pop() if len(pairStack) else None
+                if (partner == None): 
+                    raise Exception (f"Unbalanced parenthesis notation: found closing character '{char}'")
+                bp_list.append([partner, i])
+            elif char in closeDelimiters and activeCloseDelimiter == None:
+                # If we encounter a closing delimiter before we've picked which we're using,
+                # it means we have a closing delimiter without a matching opening delimiter, which is an error
+                raise Exception (f"Unbalanced parenthesis notation: found closing character '{char}'")
+            elif char.isalpha():
+                # Alpha brackets should only be used in pseudoknotted structures
+                raise Exception(f"Unexpected character '{char}'; did you mean to pass allow_pseudoknots=True?")
+            else:
+                print(f"WARNING: characters in structure, '{char}' ignored!")
+                
+        if (len(pairStack)):
+            raise Exception(f"Unbalanced parenthesis notation: found unclosed pair for character '{char}'")
 
-    l = []
-    for left, right in zip(lefts, rights):
-        bp1 = []
-        bp2 = []
-        for i, char in enumerate(s):
-            if char == left:
-                bp1.append(i)
-            elif char == right:
-                bp2.append(i)
-
-        for i in list(reversed(bp1)):
-            for j in bp2:
-                if j > i:
-                    l.append([i, j])
-
-                    bp2.remove(j)
-                    break
-    l = sorted(l, key=lambda x: x[0])
-    return l
-
+    bp_list = sorted(bp_list, key=lambda x: x[0])
+    return bp_list;
 
 def convert_dotbracket_to_bp_dict(s, allow_pseudoknots=False):
 
@@ -395,7 +464,7 @@ def convert_dotbracket_to_bp_dict(s, allow_pseudoknots=False):
     char_ignored = [char for char in s if char not in rights + lefts + ["."]]
     char_ignored = list(set(char_ignored))
     if char_ignored != []:
-        print("WARNING: characters in structuture,", char_ignored, "ignored!")
+        print("WARNING: characters in structure,", char_ignored, "ignored!")
 
     m = {}
     for left, right in zip(lefts, rights):
