@@ -68,8 +68,6 @@ def test_structure_sanitization_success():
   for (i, case) in enumerate(success_cases):
     bp_list = utils.convert_dotbracket_to_bp_list(case[0], allow_pseudoknots=case[1])
     dbn = utils.convert_bp_list_to_dotbracket(bp_list, seq_len=len(case[0]))
-
-    print(dbn)
     assert(dbn == success_expected_output[i])
 
 failure_cases = [
@@ -99,10 +97,6 @@ failure_expected_output = [
 
 def test_structure_sanitization_failure():
   for (i, case) in enumerate(failure_cases):
-    # print(i)
-    print(case)
-    
     with pytest.raises(Exception) as exc_info:
       bp_list = utils.convert_dotbracket_to_bp_list(case[0], allow_pseudoknots=case[1])
-
     assert(str(exc_info.value) == failure_expected_output[i])
