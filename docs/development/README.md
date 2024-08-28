@@ -7,6 +7,28 @@ The `arnie` package source code is hosted on [Github](https://github.com/DasLab/
 git clone https://github.com/DasLab/arnie.git
 ```
 
+You can also use pip to install arnie from our Github repo:
+```
+pip install git+https://github.com/DasLab/arnie
+```
+This is particularly useful for testing new features internally before releasing on PyPI.
+
+## Repo Organization
+
+`src/arnie`: source code for the arnie package.
+
+`docs`: docsify-based markdown documentation for the arnie package.
+
+`tests`: unit tests 
+
+`notebooks`: example jupyter notebooks with usage.
+
+`scripts`: scripts for processing sequences in batch.
+
+`parameter_files`: dir of various parameter files for packages, put here out of convenience.
+
+
+
 ## Github Issues
 We use [Github issues](https://github.com/DasLab/arnie/issues) to coordinate development tasks and track feature development and bug fixes. If you run into problems while using `arnie`, please file an issue so that we can address the bug. Similarly, if you have a feature idea that could simplify your research, file an issue detailing your proposed feature. 
 

@@ -2,7 +2,7 @@
 
 [Pseudoknots](https://en.wikipedia.org/wiki/Pseudoknot) are a more complex form of secondary structure. 
 
-<img src='/gh-docs/assets/pseudoknot.png' alt="example of a pseudoknot"></img>
+<img src='/assets/pseudoknot.png' alt="example of a pseudoknot"></img>
 
 Unpaired bases in a loop structure may pair with nucleotides elsewhere in the RNA sequence. This type of pairing is impossible to represent with the `(`, `)`, `.` and characters in traditional dot bracket notation, so we introduce new characters to represent various levels of pseudoknot pairings. In order, Arnie uses `[`, `{`, `<`, and lower case alphabet characters (`abc...`) to represent opening pairs, and `]`, `}`, `>`, and upper case alphabet characters (`ABC...`) to represent closing pairs. 
 
