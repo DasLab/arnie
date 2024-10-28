@@ -201,8 +201,10 @@ def mfe_vienna_(seq, T=37, version='2', constraint=None, motif=None, param_file=
     if p.returncode:
         raise Exception('RNAfold failed: on %s\n%s' % (seq, stderr))
     os.remove(fname)
-    if os.path.exists('rna.ps'):
+    try:
         os.remove('rna.ps')
+    except OSError:
+        pass
 
     if 'omitting constraint' in stderr.decode('utf-8'):
         raise ValueError('Constraint caused impossible structure')
