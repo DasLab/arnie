@@ -304,6 +304,7 @@ def load_package_locations(DEBUG=False):
             envVar = f"{package.upper()}HOME"
         path = os.environ.get(envVar)
         if path:
+            if package == "nupack": path += "/bin"
             return_dct[package] = path
             if DEBUG:
                 print(f'{package}: {path}')
