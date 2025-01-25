@@ -308,7 +308,8 @@ def _run_spotrna(seq, cpu=32):
     spotrna_conda_env = package_locs["spotrna_conda_env"]
     out_folder = get_random_folder()
     mkdir(out_folder)
-    fasta_file = f"{out_folder}/temp.fasta"
+    input_id = local_rand_filename()
+    fasta_file = f"{out_folder}/{input_id}.fasta"
     f = open(fasta_file, "w")
     f.write(">seq\n")
     f.write(seq)
@@ -472,4 +473,3 @@ def _nupack_mfe_pk(seq):
     remove(f'{fasta_file}.mfe')
     rmdir(out_folder)
     return struct
-
