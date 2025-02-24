@@ -167,6 +167,7 @@ def _hungarian(bpp, exp=1, sigmoid_slope_factor=None, prob_to_0_threshold_prior=
             bps.append(conflict)
             bp_assignments.remove(conflict)
             check_nt = next((nt for nt in conflict if nt != check_nt), None)
+        
         if len(bps) == 1:
             bp_list.extend(bps)
         elif len(bps) > 2 and bps[0][0] in bps[-1] or bps[0][1] in bps[-1]:
@@ -215,7 +216,7 @@ def _max_weight_independent_set(pairs, probs):
                 max_sets.append(max_sets[-1])
             else:
                 max_sets.append({'prob': max_sets[-2]['prob'] + bp_prob, 'bps': [*max_sets[-2]['bps'], bp]})
-    
+
     return (max_sets[-1]['bps'], max_sets[-1]['prob'])
 
 def _sigmoid(x, slope_factor=0.5):
