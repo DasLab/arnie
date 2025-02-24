@@ -137,11 +137,7 @@ def _hungarian(bpp, exp=1, sigmoid_slope_factor=None, prob_to_0_threshold_prior=
         bpp = _sigmoid(bpp, slope_factor=sigmoid_slope_factor)
 
         # should think about order of above functions and possibly normalize again here
-        # (normalize again we shall...)
-        if add_p_unpaired:
-            row_sums = bpp.sum(axis=1)
-            bpp = bpp / row_sums[:, np.newaxis]
-
+        
         # run hungarian algorithm to find base pairs
     _, row_pairs = linear_sum_assignment(-bpp)
     bp_list = []
