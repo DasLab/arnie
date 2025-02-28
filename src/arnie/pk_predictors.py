@@ -170,7 +170,7 @@ def _hungarian(bpp, exp=1, sigmoid_slope_factor=None, prob_to_0_threshold_prior=
         
         if len(bps) == 1:
             bp_list.extend(bps)
-        elif len(bps) > 2 and bps[0][0] in bps[-1] or bps[0][1] in bps[-1]:
+        elif len(bps) > 2 and (bps[0][0] in bps[-1] or bps[0][1] in bps[-1]):
             # We have a cycle. We need to try both excluding the first element and excluding
             # the last element (only one or the other, or neither, can be present since they conflict)
             (bp_list_a,prob_a) = _max_weight_independent_set(bps[1:], bpp_orig)
