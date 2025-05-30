@@ -607,7 +607,7 @@ def get_expected_accuracy(dbn_string, bp_matrix, mode='mcc'):
     assert bp_matrix.shape[0] == bp_matrix.shape[1]
     assert bp_matrix.shape[0] == len(dbn_string)
 
-    struct_matrix = convert_dotbracket_to_matrix(dbn_string)
+    struct_matrix = convert_dotbracket_to_matrix(dbn_string, allow_pseudoknots=True)
     N = len(dbn_string)
 
     pred_m = struct_matrix[np.triu_indices(N)]
